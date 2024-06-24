@@ -2,88 +2,62 @@ syntax = "proto3";
 
 package flowstate.v1alpha1;
 
-message StateCtxRef {
-  string id = 1;
-  int64 rev = 2;
-}
-
-message Command {
-  oneof command {
-    Transit transit = 1;
-    Pause pause = 2;
-    Resume resume = 3;
-    End end = 4;
-    Execute execute = 5;
-    Commit commit = 6;
-    Delay delay = 7;
-  }
-}
-
-message CommandResult {
-  oneof result {
-    TransitResult transit = 1;
-    PauseResult pause = 2;
-    ResumeResult resume = 3;
-    EndResult end = 4;
-    ExecuteResult execute = 5;
-    CommitResult commit = 6;
-    DelayResult delay = 7;
-  }
-}
+import "flowstate/v1alpha1/state.proto";
+import "google/protobuf/any.proto";
 
 message Transit {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
   string flow_id = 2;
 }
 
 message TransitResult {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message Pause {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message PauseResult {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message Resume {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message ResumeResult {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message End {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message EndResult {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message Execute {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message ExecuteResult {
 }
 
 message Delay {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
   string duration = 2;
 }
 
 message DelayResult {
-  StateCtxRef state_ctx = 1;
+  StateRef state_ref = 1;
 }
 
 message Commit {
-  repeated Command commands = 1;
+  repeated google.protobuf.Any commands = 1;
 }
 
 message CommitResult {
-  repeated CommandResult results = 1;
+  repeated google.protobuf.Any results = 2;
 }

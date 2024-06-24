@@ -7,6 +7,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	v1alpha1 "github.com/makasim/flowstatesrv/internal/protogen/flowstate/v1alpha1"
+	anypb "google.golang.org/protobuf/types/known/anypb"
 )
 
 type Handler struct {
@@ -20,8 +21,8 @@ func New(e *flowstate.Engine) *Handler {
 }
 
 func (s *Handler) Do(_ context.Context, req *connect.Request[v1alpha1.DoRequest]) (*connect.Response[v1alpha1.DoResponse], error) {
-	stateCtxs := make([]*flowstate.StateCtx, 0, len(req.Msg.StateCtxs))
-	for _, apiS := range req.Msg.StateCtxs {
+	stateCtxs := make([]*flowstate.StateCtx, 0, len(req.Msg.Contexts))
+	for _, apiS := range req.Msg.Contexts {
 		stateCtxs = append(stateCtxs, convAPIToStateCtx(apiS))
 	}
 
@@ -39,19 +40,23 @@ func (s *Handler) Do(_ context.Context, req *connect.Request[v1alpha1.DoRequest]
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	results := make([]*v1alpha1.CommandResult, 0, len(cmds))
+	results := make([]*anypb.Any, 0, len(cmds))
 	for _, cmd := range cmds {
 		cmdRes, err := convCommandToAPI(cmd)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
+		anyCmdRes, err := anypb.New(cmdRes)
+		if err != nil {
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
 
-		results = append(results, cmdRes)
+		results = append(results, anyCmdRes)
 	}
 
 	return connect.NewResponse(&v1alpha1.DoResponse{
-		StateCtxs: convStateCtxsToAPI(stateCtxs),
-		Results:   results,
+		Contexts: convStateCtxsToAPI(stateCtxs),
+		Results:  results,
 	}), nil
 }
 
@@ -80,7 +85,7 @@ func (s *Handler) Watch(ctx context.Context, req *connect.Request[v1alpha1.Watch
 	}
 }
 
-func findStateCtxByRef(ref *v1alpha1.StateCtxRef, stateCtxs []*flowstate.StateCtx) (*flowstate.StateCtx, error) {
+func findStateCtxByRef(ref *v1alpha1.StateRef, stateCtxs []*flowstate.StateCtx) (*flowstate.StateCtx, error) {
 	for _, stateCtx := range stateCtxs {
 		if string(stateCtx.Current.ID) == ref.Id && stateCtx.Current.Rev == ref.Rev {
 			return stateCtx, nil
@@ -90,33 +95,43 @@ func findStateCtxByRef(ref *v1alpha1.StateCtxRef, stateCtxs []*flowstate.StateCt
 	return nil, fmt.Errorf("there is no state ctx provided for ref: %s:%d", ref.Id, ref.Rev)
 }
 
-func convAPIToCommand(apiC *v1alpha1.Command, stateCtxs []*flowstate.StateCtx) (flowstate.Command, error) {
-	switch {
-	case apiC.GetTransit() != nil:
-		stateCtx, err := findStateCtxByRef(apiC.GetTransit().StateCtx, stateCtxs)
+func convAPIToCommand(apiC *anypb.Any, stateCtxs []*flowstate.StateCtx) (flowstate.Command, error) {
+	switch apiC.TypeUrl {
+	case `type.googleapis.com/flowstate.v1alpha1.Transit`:
+		apiCmd := &v1alpha1.Transit{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stateCtx, err := findStateCtxByRef(apiCmd.StateRef, stateCtxs)
 		if err != nil {
 			return nil, err
 		}
 
-		return flowstate.Transit(stateCtx, flowstate.FlowID(apiC.GetTransit().FlowId)), nil
-	case apiC.GetCommit() != nil:
-		subCmds := make([]flowstate.Command, 0, len(apiC.GetCommit().Commands))
-		for _, subCmd := range apiC.GetCommit().Commands {
-			cmd, err := convAPIToCommand(subCmd, stateCtxs)
+		return flowstate.Transit(stateCtx, flowstate.FlowID(apiCmd.FlowId)), nil
+	case `type.googleapis.com/flowstate.v1alpha1.Commit`:
+		apiCmd := &v1alpha1.Commit{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		subCmds := make([]flowstate.Command, 0, len(apiCmd.Commands))
+		for _, subCmd := range apiCmd.Commands {
+			subCmd, err := convAPIToCommand(subCmd, stateCtxs)
 			if err != nil {
 				return nil, err
 			}
 
-			subCmds = append(subCmds, cmd)
+			subCmds = append(subCmds, subCmd)
 		}
 
 		return flowstate.Commit(subCmds...), nil
 	default:
-		return nil, fmt.Errorf("unknown command type %T", apiC.GetCommand())
+		return nil, fmt.Errorf("unknown command %s", apiC.TypeUrl)
 	}
 }
 
-func convAPIToStateCtx(apiS *v1alpha1.StateCtx) *flowstate.StateCtx {
+func convAPIToStateCtx(apiS *v1alpha1.Context) *flowstate.StateCtx {
 	return &flowstate.StateCtx{
 		Current:     convAPIToState(apiS.Current),
 		Committed:   convAPIToState(apiS.Committed),
@@ -148,6 +163,10 @@ func convAPIToTransitions(apiTs []*v1alpha1.Transition) []flowstate.Transition {
 }
 
 func convAPIToTransition(apiT *v1alpha1.Transition) flowstate.Transition {
+	if apiT == nil {
+		return flowstate.Transition{}
+	}
+
 	return flowstate.Transition{
 		FromID:      flowstate.FlowID(apiT.From),
 		ToID:        flowstate.FlowID(apiT.To),
@@ -155,57 +174,49 @@ func convAPIToTransition(apiT *v1alpha1.Transition) flowstate.Transition {
 	}
 }
 
-func convCommandToAPI(cmd flowstate.Command) (*v1alpha1.CommandResult, error) {
+func convCommandToAPI(cmd flowstate.Command) (*anypb.Any, error) {
 	switch cmd1 := cmd.(type) {
 	case *flowstate.TransitCommand:
-		return &v1alpha1.CommandResult{
-			Result: &v1alpha1.CommandResult_Transit{
-				Transit: &v1alpha1.TransitResult{
-					StateCtx: convStateCtxToRefAPI(cmd1.StateCtx),
-				},
-			},
-		}, nil
+		return anypb.New(&v1alpha1.TransitResult{
+			StateRef: convStateCtxToRefAPI(cmd1.StateCtx),
+		})
 	case *flowstate.CommitCommand:
-		apiCmdResults := make([]*v1alpha1.CommandResult, 0, len(cmd1.Commands))
+		subResults := make([]*anypb.Any, 0, len(cmd1.Commands))
 		for _, subCmd := range cmd1.Commands {
-			apiCmd, err := convCommandToAPI(subCmd)
+			subRes, err := convCommandToAPI(subCmd)
 			if err != nil {
 				return nil, err
 			}
 
-			apiCmdResults = append(apiCmdResults, apiCmd)
+			subResults = append(subResults, subRes)
 		}
 
-		return &v1alpha1.CommandResult{
-			Result: &v1alpha1.CommandResult_Commit{
-				Commit: &v1alpha1.CommitResult{
-					Results: apiCmdResults,
-				},
-			},
-		}, nil
+		return anypb.New(&v1alpha1.CommitResult{
+			Results: subResults,
+		})
 	default:
 		return nil, fmt.Errorf("unknown command type %T", cmd)
 	}
 }
 
-func convStateCtxsToAPI(ss []*flowstate.StateCtx) []*v1alpha1.StateCtx {
-	apiS := make([]*v1alpha1.StateCtx, 0, len(ss))
+func convStateCtxsToAPI(ss []*flowstate.StateCtx) []*v1alpha1.Context {
+	apiS := make([]*v1alpha1.Context, 0, len(ss))
 	for _, stateCtx := range ss {
 		apiS = append(apiS, convStateCtxToAPI(stateCtx))
 	}
 	return apiS
 }
 
-func convStateCtxToAPI(s *flowstate.StateCtx) *v1alpha1.StateCtx {
-	return &v1alpha1.StateCtx{
+func convStateCtxToAPI(s *flowstate.StateCtx) *v1alpha1.Context {
+	return &v1alpha1.Context{
 		Committed:   convStateToAPI(s.Committed),
 		Current:     convStateToAPI(s.Current),
 		Transitions: convTransitionsToAPI(s.Transitions),
 	}
 }
 
-func convStateCtxToRefAPI(s *flowstate.StateCtx) *v1alpha1.StateCtxRef {
-	return &v1alpha1.StateCtxRef{
+func convStateCtxToRefAPI(s *flowstate.StateCtx) *v1alpha1.StateRef {
+	return &v1alpha1.StateRef{
 		Id:  string(s.Current.ID),
 		Rev: s.Current.Rev,
 	}

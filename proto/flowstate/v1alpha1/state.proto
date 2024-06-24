@@ -2,7 +2,12 @@ syntax = "proto3";
 
 package flowstate.v1alpha1;
 
-message StateCtx {
+message StateRef {
+  string id = 1;
+  int64 rev = 2;
+}
+
+message Context {
   State committed = 1;
   State current = 2;
   repeated Transition transitions = 3;
