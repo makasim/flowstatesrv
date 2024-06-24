@@ -2,7 +2,10 @@ syntax = "proto3";
 
 package flowstate.v1alpha1;
 
-import "flowstate/v1alpha1/state.proto";
+message StateCtxRef {
+  string id = 1;
+  int64 rev = 2;
+}
 
 message Command {
   oneof command {
@@ -29,52 +32,52 @@ message CommandResult {
 }
 
 message Transit {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
   string flow_id = 2;
 }
 
 message TransitResult {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message Pause {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message PauseResult {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message Resume {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message ResumeResult {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message End {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message EndResult {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message Execute {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message ExecuteResult {
 }
 
 message Delay {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
   string duration = 2;
 }
 
 message DelayResult {
-  StateCtx state_ctx = 1;
+  StateCtxRef state_ctx = 1;
 }
 
 message Commit {

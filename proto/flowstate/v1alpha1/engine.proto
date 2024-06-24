@@ -6,11 +6,13 @@ import "flowstate/v1alpha1/commands.proto";
 import "flowstate/v1alpha1/state.proto";
 
 message DoRequest {
-  repeated Command commands = 1;
+  repeated StateCtx state_ctxs = 1;
+  repeated Command commands = 2;
 }
 
 message DoResponse {
-  repeated CommandResult results = 1;
+  repeated StateCtx state_ctxs = 1;
+  repeated CommandResult results = 2;
 }
 
 message WatchRequest {
@@ -20,7 +22,7 @@ message WatchRequest {
 }
 
 message WatchResponse {
-  StateCtx state_ctx = 1;
+  State state = 1;
 }
 
 service EngineService {
