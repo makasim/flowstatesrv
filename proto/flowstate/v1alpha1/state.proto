@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package flowstate.v1alpha1;
+
+message StateCtx {
+  State committed = 1;
+  State current = 2;
+  repeated Transition transitions = 3;
+}
+
+message State {
+  string id = 1;
+  int64 rev = 2;
+  map<string, string> annotations = 3;
+  map<string, string> labels = 4;
+  int64 committed_at_unix_milli = 5;
+  Transition transition = 6;
+}
+
+message Transition {
+  string from = 1;
+  string to = 2;
+  map<string, string> annotations = 3;
+}
