@@ -16,6 +16,7 @@ message TransitResult {
 
 message Pause {
   StateRef state_ref = 1;
+  string flow_id = 2;
 }
 
 message PauseResult {
@@ -43,15 +44,19 @@ message Execute {
 }
 
 message ExecuteResult {
+  StateRef state_ref = 1;
 }
 
 message Delay {
   StateRef state_ref = 1;
   string duration = 2;
+  bool commit = 3;
 }
 
 message DelayResult {
   StateRef state_ref = 1;
+  string duration = 2;
+  bool commit = 3;
 }
 
 message Commit {
