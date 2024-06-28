@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package flowstate.v1alpha1;
+
+message RegisterRequest {
+  string flow_id = 1;
+  string http_host = 2;
+}
+
+message RegisterResponse {
+}
+
+service FlowService {
+  rpc Register(RegisterRequest) returns (RegisterResponse) {}
+}

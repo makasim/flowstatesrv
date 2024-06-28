@@ -6,12 +6,12 @@ import "flowstate/v1alpha1/state.proto";
 import "google/protobuf/any.proto";
 
 message DoRequest {
-  repeated Context contexts = 1;
+  repeated StateContext state_contexts = 1;
   repeated google.protobuf.Any commands = 2;
 }
 
 message DoResponse {
-  repeated Context contexts = 1;
+  repeated StateContext state_contexts = 1;
   repeated google.protobuf.Any results = 2;
 }
 

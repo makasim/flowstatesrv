@@ -11,7 +11,7 @@ import (
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/memdriver"
 	"github.com/makasim/flowstatesrv/internal/api/enginehandlerv1alpha1"
-	"github.com/makasim/flowstatesrv/internal/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )

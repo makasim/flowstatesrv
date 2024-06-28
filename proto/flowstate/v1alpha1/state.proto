@@ -7,7 +7,7 @@ message StateRef {
   int64 rev = 2;
 }
 
-message Context {
+message StateContext {
   State committed = 1;
   State current = 2;
   repeated Transition transitions = 3;
