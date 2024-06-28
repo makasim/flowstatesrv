@@ -3,6 +3,7 @@ package enginehandlerv1alpha1
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
@@ -109,6 +110,74 @@ func convAPIToCommand(apiC *anypb.Any, stateCtxs []*flowstate.StateCtx) (flowsta
 		}
 
 		return flowstate.Transit(stateCtx, flowstate.FlowID(apiCmd.FlowId)), nil
+	case `type.googleapis.com/flowstate.v1alpha1.Pause`:
+		apiCmd := &v1alpha1.Pause{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stateCtx, err := findStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.Pause(stateCtx, flowstate.FlowID(apiCmd.FlowId)), nil
+	case `type.googleapis.com/flowstate.v1alpha1.Resume`:
+		apiCmd := &v1alpha1.Resume{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stateCtx, err := findStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.Resume(stateCtx), nil
+	case `type.googleapis.com/flowstate.v1alpha1.End`:
+		apiCmd := &v1alpha1.End{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stateCtx, err := findStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.End(stateCtx), nil
+	case `type.googleapis.com/flowstate.v1alpha1.Execute`:
+		apiCmd := &v1alpha1.Execute{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stateCtx, err := findStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.Execute(stateCtx), nil
+	case `type.googleapis.com/flowstate.v1alpha1.Delay`:
+		apiCmd := &v1alpha1.Delay{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stateCtx, err := findStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		dur, err := time.ParseDuration(apiCmd.Duration)
+		if err != nil {
+			return nil, err
+		}
+
+		cmd := flowstate.Delay(stateCtx, dur)
+		cmd.Commit = apiCmd.Commit
+
+		return cmd, nil
 	case `type.googleapis.com/flowstate.v1alpha1.Commit`:
 		apiCmd := &v1alpha1.Commit{}
 		if err := apiC.UnmarshalTo(apiCmd); err != nil {
@@ -179,6 +248,28 @@ func convCommandToAPI(cmd flowstate.Command) (*anypb.Any, error) {
 	case *flowstate.TransitCommand:
 		return anypb.New(&v1alpha1.TransitResult{
 			StateRef: convStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.PauseCommand:
+		return anypb.New(&v1alpha1.PauseResult{
+			StateRef: convStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.ResumeCommand:
+		return anypb.New(&v1alpha1.ResumeResult{
+			StateRef: convStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.EndCommand:
+		return anypb.New(&v1alpha1.EndResult{
+			StateRef: convStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.ExecuteCommand:
+		return anypb.New(&v1alpha1.ExecuteResult{
+			StateRef: convStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.DelayCommand:
+		return anypb.New(&v1alpha1.DelayResult{
+			StateRef: convStateCtxToRefAPI(cmd1.StateCtx),
+			Duration: cmd1.Duration.String(),
+			Commit:   cmd1.Commit,
 		})
 	case *flowstate.CommitCommand:
 		subResults := make([]*anypb.Any, 0, len(cmd1.Commands))
