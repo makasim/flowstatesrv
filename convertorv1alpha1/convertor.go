@@ -20,7 +20,7 @@ func FindStateCtxByRef(ref *v1alpha1.StateRef, stateCtxs []*flowstate.StateCtx) 
 	return nil, fmt.Errorf("there is no state ctx provided for ref: %s:%d", ref.Id, ref.Rev)
 }
 
-func ConvertAPIToCommand(apiC *anypb.Any, stateCtxs []*flowstate.StateCtx) (flowstate.Command, error) {
+func APICommandToCommand(apiC *anypb.Any, stateCtxs []*flowstate.StateCtx) (flowstate.Command, error) {
 	switch apiC.TypeUrl {
 	case `type.googleapis.com/flowstate.v1alpha1.Transit`:
 		apiCmd := &v1alpha1.Transit{}
@@ -110,7 +110,7 @@ func ConvertAPIToCommand(apiC *anypb.Any, stateCtxs []*flowstate.StateCtx) (flow
 
 		subCmds := make([]flowstate.Command, 0, len(apiCmd.Commands))
 		for _, subCmd := range apiCmd.Commands {
-			subCmd, err := ConvertAPIToCommand(subCmd, stateCtxs)
+			subCmd, err := APICommandToCommand(subCmd, stateCtxs)
 			if err != nil {
 				return nil, err
 			}
@@ -130,6 +130,14 @@ func ConvertAPIToStateCtx(apiS *v1alpha1.StateContext) *flowstate.StateCtx {
 		Committed:   ConvertAPIToState(apiS.Committed),
 		Transitions: ConvertAPIToTransitions(apiS.Transitions),
 	}
+}
+
+func ConvertAPIToStateCtxs(apiS []*v1alpha1.StateContext) []*flowstate.StateCtx {
+	stateCtxs := make([]*flowstate.StateCtx, 0, len(apiS))
+	for _, apiS := range apiS {
+		stateCtxs = append(stateCtxs, ConvertAPIToStateCtx(apiS))
+	}
+	return stateCtxs
 }
 
 func ConvertAPIToState(apiS *v1alpha1.State) flowstate.State {
@@ -167,7 +175,59 @@ func ConvertAPIToTransition(apiT *v1alpha1.Transition) flowstate.Transition {
 	}
 }
 
-func ConvertCommandToAPI(cmd flowstate.Command) (*anypb.Any, error) {
+func CommandToAPICommand(cmd flowstate.Command) (*anypb.Any, error) {
+	switch cmd1 := cmd.(type) {
+	case *flowstate.TransitCommand:
+		return anypb.New(&v1alpha1.Transit{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+			FlowId:   string(cmd1.FlowID),
+		})
+	case *flowstate.PauseCommand:
+		return anypb.New(&v1alpha1.Pause{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.ResumeCommand:
+		return anypb.New(&v1alpha1.Resume{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.EndCommand:
+		return anypb.New(&v1alpha1.End{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.ExecuteCommand:
+		return anypb.New(&v1alpha1.Execute{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.DelayCommand:
+		return anypb.New(&v1alpha1.Delay{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+			Duration: cmd1.Duration.String(),
+			Commit:   cmd1.Commit,
+		})
+	case *flowstate.NoopCommand:
+		return anypb.New(&v1alpha1.Noop{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *flowstate.CommitCommand:
+		subCmds := make([]*anypb.Any, 0, len(cmd1.Commands))
+		for _, subCmd := range cmd1.Commands {
+			subRes, err := CommandToAPICommand(subCmd)
+			if err != nil {
+				return nil, err
+			}
+
+			subCmds = append(subCmds, subRes)
+		}
+
+		return anypb.New(&v1alpha1.Commit{
+			Commands: subCmds,
+		})
+	default:
+		return nil, fmt.Errorf("unknown command type %T", cmd)
+	}
+}
+
+func CommandToAPIResult(cmd flowstate.Command) (*anypb.Any, error) {
 	switch cmd1 := cmd.(type) {
 	case *flowstate.TransitCommand:
 		return anypb.New(&v1alpha1.TransitResult{
@@ -195,10 +255,14 @@ func ConvertCommandToAPI(cmd flowstate.Command) (*anypb.Any, error) {
 			Duration: cmd1.Duration.String(),
 			Commit:   cmd1.Commit,
 		})
+	case *flowstate.NoopCommand:
+		return anypb.New(&v1alpha1.NoopResult{
+			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+		})
 	case *flowstate.CommitCommand:
 		subResults := make([]*anypb.Any, 0, len(cmd1.Commands))
 		for _, subCmd := range cmd1.Commands {
-			subRes, err := ConvertCommandToAPI(subCmd)
+			subRes, err := CommandToAPIResult(subCmd)
 			if err != nil {
 				return nil, err
 			}
@@ -217,7 +281,7 @@ func ConvertCommandToAPI(cmd flowstate.Command) (*anypb.Any, error) {
 func ConvertCommandsToAPI(cmds []flowstate.Command) ([]*anypb.Any, error) {
 	apiCmds := make([]*anypb.Any, 0, len(cmds))
 	for _, cmd := range cmds {
-		apiCmd, err := ConvertCommandToAPI(cmd)
+		apiCmd, err := CommandToAPICommand(cmd)
 		if err != nil {
 			return nil, err
 		}
@@ -244,25 +308,14 @@ func ConvertCommandToStateContexts(cmd flowstate.Command) []*v1alpha1.StateConte
 		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
 	case *flowstate.DelayCommand:
 		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
+	case *flowstate.NoopCommand:
+		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
 	case *flowstate.CommitCommand:
 		for _, subCmd := range cmd1.Commands {
 			apiStateCtxs = append(apiStateCtxs, ConvertCommandToStateContexts(subCmd)...)
 		}
 	default:
 		return nil
-	}
-
-	slices.CompactFunc(apiStateCtxs, func(l, r *v1alpha1.StateContext) bool {
-		return l.Current.Id == r.Current.Id && l.Current.Rev == r.Current.Rev
-	})
-
-	return apiStateCtxs
-}
-
-func ConvertCommandsToStateContexts(cmds []flowstate.Command) []*v1alpha1.StateContext {
-	apiStateCtxs := make([]*v1alpha1.StateContext, 0)
-	for _, cmd := range cmds {
-		apiStateCtxs = append(apiStateCtxs, ConvertCommandToStateContexts(cmd)...)
 	}
 
 	slices.CompactFunc(apiStateCtxs, func(l, r *v1alpha1.StateContext) bool {

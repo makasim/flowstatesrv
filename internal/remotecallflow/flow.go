@@ -62,7 +62,7 @@ func (f *Flow) Execute(stateCtx *flowstate.StateCtx, e *flowstate.Engine) (flows
 
 	resStateCtx := convertorv1alpha1.ConvertAPIToStateCtx(res.StateContext)
 
-	cmd, err := convertorv1alpha1.ConvertAPIToCommand(res.Command, []*flowstate.StateCtx{resStateCtx})
+	cmd, err := convertorv1alpha1.APICommandToCommand(res.Command, []*flowstate.StateCtx{resStateCtx})
 	if err != nil {
 		return nil, err
 	}

@@ -24,7 +24,7 @@ func New(fr flowRegistry) *Handler {
 }
 
 func (s *Handler) Register(_ context.Context, req *connect.Request[v1alpha1.RegisterRequest]) (*connect.Response[v1alpha1.RegisterResponse], error) {
-	callURL := req.Msg.HttpHost + `/flowstate.v1alpha1.FlowService/Register`
+	callURL := req.Msg.HttpHost + `/flowstate.flow.v1alpha1.FlowService/Execute`
 
 	s.fr.SetFlow(
 		flowstate.FlowID(req.Msg.FlowId),

@@ -66,3 +66,11 @@ message Commit {
 message CommitResult {
   repeated google.protobuf.Any results = 2;
 }
+
+message Noop {
+  StateRef state_ref = 1;
+}
+
+message NoopResult {
+  StateRef state_ref = 1;
+}

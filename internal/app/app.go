@@ -32,11 +32,6 @@ func New(cfg Config) *App {
 
 func (a *App) Run(ctx context.Context) error {
 	d := memdriver.New()
-	d.SetFlow("test", flowstate.FlowFunc(func(stateCtx *flowstate.StateCtx, e *flowstate.Engine) (flowstate.Command, error) {
-		log.Println("test flow executed!")
-		return flowstate.End(stateCtx), nil
-	}))
-
 	e, err := flowstate.NewEngine(d)
 	if err != nil {
 		return fmt.Errorf("new engine: %w", err)

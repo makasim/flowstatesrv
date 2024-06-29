@@ -28,11 +28,10 @@ func (s *Handler) Do(_ context.Context, req *connect.Request[v1alpha1.DoRequest]
 
 	cmds := make([]flowstate.Command, 0, len(req.Msg.Commands))
 	for _, apiC := range req.Msg.Commands {
-		cmd, err := convertorv1alpha1.ConvertAPIToCommand(apiC, stateCtxs)
+		cmd, err := convertorv1alpha1.APICommandToCommand(apiC, stateCtxs)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInvalidArgument, err)
 		}
-
 		cmds = append(cmds, cmd)
 	}
 
@@ -42,16 +41,12 @@ func (s *Handler) Do(_ context.Context, req *connect.Request[v1alpha1.DoRequest]
 
 	results := make([]*anypb.Any, 0, len(cmds))
 	for _, cmd := range cmds {
-		cmdRes, err := convertorv1alpha1.ConvertCommandToAPI(cmd)
-		if err != nil {
-			return nil, connect.NewError(connect.CodeInternal, err)
-		}
-		anyCmdRes, err := anypb.New(cmdRes)
+		cmdRes, err := convertorv1alpha1.CommandToAPIResult(cmd)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInternal, err)
 		}
 
-		results = append(results, anyCmdRes)
+		results = append(results, cmdRes)
 	}
 
 	return connect.NewResponse(&v1alpha1.DoResponse{
