@@ -2,6 +2,7 @@ package srvdriver
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"connectrpc.com/connect"
@@ -71,33 +72,31 @@ func (lis *listener) Watch() <-chan flowstate.State {
 }
 
 func (lis *listener) Close() {
-	log.Println(1000000)
 	close(lis.closeCh)
-	log.Println(1000001)
-
 	<-lis.closedCh
 }
 
 func (lis *listener) listen() {
-	srvS, err := lis.ec.Watch(context.Background(), connect.NewRequest(&v1alpha1.WatchRequest{
+	defer close(lis.closedCh)
+
+	wCtx, wCtxCancel := context.WithCancel(context.Background())
+
+	srvS, err := lis.ec.Watch(wCtx, connect.NewRequest(&v1alpha1.WatchRequest{
 		SinceRev:    lis.sinceRev,
 		SinceLatest: lis.sinceLatest,
 		Labels:      lis.labels,
 	}))
 	if err != nil {
+		wCtxCancel()
 		log.Println("WARN: call: watch: ", err)
 		return
 	}
 	go func() {
-		defer close(lis.closedCh)
-
-		log.Println(1000002)
 		<-lis.closeCh
-		log.Println(1000003)
+		wCtxCancel()
 		if err := srvS.Close(); err != nil {
 			log.Println("WARN: watch stream: close: ", err)
 		}
-		log.Println(1000004)
 	}()
 
 	for srvS.Receive() {
@@ -109,7 +108,7 @@ func (lis *listener) listen() {
 			return
 		}
 	}
-	if srvS.Err() != nil {
+	if srvS.Err() != nil && !errors.Is(srvS.Err(), context.Canceled) {
 		log.Println("WARN: watch: receive: ", srvS.Err())
 	}
 }

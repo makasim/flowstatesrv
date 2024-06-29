@@ -102,7 +102,9 @@ func (d *Driver) Shutdown(_ context.Context) error {
 		return err
 	}
 
-	d.hc.CloseIdleConnections()
+	if err := d.hc.Close(); err != nil {
+		return err
+	}
 
 	return nil
 }
