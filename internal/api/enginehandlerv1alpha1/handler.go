@@ -2,6 +2,7 @@ package enginehandlerv1alpha1
 
 import (
 	"context"
+	"log"
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
@@ -62,10 +63,12 @@ func (s *Handler) Watch(ctx context.Context, req *connect.Request[v1alpha1.Watch
 	if err := s.e.Do(wCmd); err != nil {
 		return connect.NewError(connect.CodeInternal, err)
 	}
+
 	w := wCmd.Watcher
 	defer w.Close()
 
 	for {
+		log.Println(1)
 		select {
 		case state := <-w.Watch():
 			apiS := convertorv1alpha1.ConvertStateToAPI(state)
@@ -75,7 +78,8 @@ func (s *Handler) Watch(ctx context.Context, req *connect.Request[v1alpha1.Watch
 				return connect.NewError(connect.CodeInternal, err)
 			}
 		case <-ctx.Done():
-			return nil
+			log.Println(9999)
+			return ctx.Err()
 		}
 	}
 }

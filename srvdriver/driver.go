@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"connectrpc.com/connect"
+	"github.com/bufbuild/httplb"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/exptcmd"
 	"github.com/makasim/flowstate/stddoer"
@@ -19,14 +20,14 @@ import (
 type Driver struct {
 	*FlowRegistry
 	hs    *http.Server
-	hc    *http.Client
+	hc    *httplb.Client
 	doers []flowstate.Doer
 	ec    flowstatev1alpha1connect.EngineServiceClient
 	fc    flowstatev1alpha1connect.FlowServiceClient
 }
 
 func New(serverHttpHost string) *Driver {
-	hc := &http.Client{}
+	hc := httplb.NewClient()
 
 	d := &Driver{
 		FlowRegistry: &FlowRegistry{},
@@ -47,7 +48,7 @@ func New(serverHttpHost string) *Driver {
 		exptcmd.UnstackDoer(),
 
 		newFlowGetter(d.FlowRegistry),
-		newWatcher(),
+		newWatcher(d.ec),
 		newRemoteDoer(d.ec),
 	}
 	d.doers = doers
