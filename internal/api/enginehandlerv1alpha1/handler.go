@@ -62,6 +62,7 @@ func (s *Handler) Watch(ctx context.Context, req *connect.Request[v1alpha1.Watch
 	if err := s.e.Do(wCmd); err != nil {
 		return connect.NewError(connect.CodeInternal, err)
 	}
+
 	w := wCmd.Watcher
 	defer w.Close()
 
@@ -75,7 +76,7 @@ func (s *Handler) Watch(ctx context.Context, req *connect.Request[v1alpha1.Watch
 				return connect.NewError(connect.CodeInternal, err)
 			}
 		case <-ctx.Done():
-			return nil
+			return ctx.Err()
 		}
 	}
 }

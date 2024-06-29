@@ -2,10 +2,12 @@ package flowhandlerv1alpha1
 
 import (
 	"context"
+	"net/http"
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/internal/remotecallflow"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1/flowv1alpha1connect"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
 )
 
@@ -24,11 +26,11 @@ func New(fr flowRegistry) *Handler {
 }
 
 func (s *Handler) Register(_ context.Context, req *connect.Request[v1alpha1.RegisterRequest]) (*connect.Response[v1alpha1.RegisterResponse], error) {
-	callURL := req.Msg.HttpHost + `/flowstate.flow.v1alpha1.FlowService/Execute`
+	fc := flowv1alpha1connect.NewFlowServiceClient(http.DefaultClient, req.Msg.HttpHost)
 
 	s.fr.SetFlow(
 		flowstate.FlowID(req.Msg.FlowId),
-		remotecallflow.New(callURL),
+		remotecallflow.New(fc),
 	)
 
 	return connect.NewResponse(&v1alpha1.RegisterResponse{}), nil
