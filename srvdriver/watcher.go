@@ -91,12 +91,11 @@ func (lis *listener) listen() {
 		log.Println("WARN: call: watch: ", err)
 		return
 	}
+	defer srvS.Close()
+
 	go func() {
 		<-lis.closeCh
 		wCtxCancel()
-		if err := srvS.Close(); err != nil {
-			log.Println("WARN: watch stream: close: ", err)
-		}
 	}()
 
 	for srvS.Receive() {
