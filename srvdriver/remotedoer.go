@@ -2,6 +2,7 @@ package srvdriver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"connectrpc.com/connect"
@@ -56,7 +57,9 @@ func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
 		StateContexts: apiStateCtxs,
 		Commands:      []*anypb.Any{apiCmd},
 	}))
-	if err != nil {
+	if conflictErr := asCommitConflictError(err); conflictErr != nil {
+		return conflictErr
+	} else if err != nil {
 		return err
 	}
 
@@ -209,4 +212,31 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 	default:
 		return fmt.Errorf("unknown command %T", cmd0)
 	}
+}
+
+func asCommitConflictError(err error) *flowstate.ErrCommitConflict {
+	// See https://connectrpc.com/docs/go/errors/#error-details
+
+	var connectErr *connect.Error
+	if !errors.As(err, &connectErr) {
+		return nil
+	}
+
+	for _, detail := range connectErr.Details() {
+		msg, valueErr := detail.Value()
+		if valueErr != nil {
+			continue // usually, errors here mean that we don't have the schema for this Protobuf message
+		}
+
+		if apiErrConflict, ok := msg.(*v1alpha1.ErrorConflict); ok {
+			conflictErr := &flowstate.ErrCommitConflict{}
+			for _, stateID := range apiErrConflict.CommittableStateIds {
+				conflictErr.Add("", flowstate.StateID(stateID), nil)
+			}
+
+			return conflictErr
+		}
+	}
+
+	return nil
 }
