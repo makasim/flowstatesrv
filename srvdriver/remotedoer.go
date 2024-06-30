@@ -7,6 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
+	"github.com/makasim/flowstate/exptcmd"
 	"github.com/makasim/flowstatesrv/convertorv1alpha1"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
@@ -188,6 +189,50 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		}
 
 		stateCtx.CopyTo(cmd.StateCtx)
+		return nil
+	case *exptcmd.StackCommand:
+		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.StackResult` {
+			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		}
+
+		apiRes := &v1alpha1.StackResult{}
+		if err := res.UnmarshalTo(apiRes); err != nil {
+			return err
+		}
+
+		stackedStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StackedStateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+		nextStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.NextStateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+
+		stackedStateCtx.CopyTo(cmd.StackedStateCtx)
+		nextStateCtx.CopyTo(cmd.NextStateCtx)
+		return nil
+	case *exptcmd.UnstackCommand:
+		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.UnstackResult` {
+			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		}
+
+		apiRes := &v1alpha1.UnstackResult{}
+		if err := res.UnmarshalTo(apiRes); err != nil {
+			return err
+		}
+
+		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+		unstackStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.UnstackStateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+
+		stateCtx.CopyTo(cmd.StateCtx)
+		unstackStateCtx.CopyTo(cmd.UnstackStateCtx)
 		return nil
 	case *flowstate.CommitCommand:
 		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.CommitResult` {
