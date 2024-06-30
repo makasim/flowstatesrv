@@ -46,7 +46,12 @@ func APICommandToCommand(apiC *anypb.Any, stateCtxs []*flowstate.StateCtx) (flow
 			return nil, err
 		}
 
-		return flowstate.Pause(stateCtx, flowstate.FlowID(apiCmd.FlowId)), nil
+		cmd := flowstate.Pause(stateCtx)
+		if apiCmd.FlowId != "" {
+			cmd = cmd.WithTransit(flowstate.FlowID(apiCmd.FlowId))
+		}
+
+		return cmd, nil
 	case `type.googleapis.com/flowstate.v1alpha1.Resume`:
 		apiCmd := &v1alpha1.Resume{}
 		if err := apiC.UnmarshalTo(apiCmd); err != nil {
