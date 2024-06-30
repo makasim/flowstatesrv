@@ -74,3 +74,23 @@ message Noop {
 message NoopResult {
   StateRef state_ref = 1;
 }
+
+message Stack {
+  StateRef stacked_state_ref = 1;
+  StateRef next_state_ref = 2;
+}
+
+message StackResult {
+  StateRef stacked_state_ref = 1;
+  StateRef next_state_ref = 2;
+}
+
+message Unstack {
+  StateRef state_ref = 1;
+  StateRef unstack_state_ref = 2;
+}
+
+message UnstackResult {
+  StateRef state_ref = 1;
+  StateRef unstack_state_ref = 2;
+}

@@ -2,10 +2,12 @@ package srvdriver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
+	"github.com/makasim/flowstate/exptcmd"
 	"github.com/makasim/flowstatesrv/convertorv1alpha1"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
@@ -56,7 +58,9 @@ func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
 		StateContexts: apiStateCtxs,
 		Commands:      []*anypb.Any{apiCmd},
 	}))
-	if err != nil {
+	if conflictErr := asCommitConflictError(err); conflictErr != nil {
+		return conflictErr
+	} else if err != nil {
 		return err
 	}
 
@@ -186,6 +190,50 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
+	case *exptcmd.StackCommand:
+		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.StackResult` {
+			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		}
+
+		apiRes := &v1alpha1.StackResult{}
+		if err := res.UnmarshalTo(apiRes); err != nil {
+			return err
+		}
+
+		stackedStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StackedStateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+		nextStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.NextStateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+
+		stackedStateCtx.CopyTo(cmd.StackedStateCtx)
+		nextStateCtx.CopyTo(cmd.NextStateCtx)
+		return nil
+	case *exptcmd.UnstackCommand:
+		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.UnstackResult` {
+			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		}
+
+		apiRes := &v1alpha1.UnstackResult{}
+		if err := res.UnmarshalTo(apiRes); err != nil {
+			return err
+		}
+
+		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+		unstackStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.UnstackStateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+
+		stateCtx.CopyTo(cmd.StateCtx)
+		unstackStateCtx.CopyTo(cmd.UnstackStateCtx)
+		return nil
 	case *flowstate.CommitCommand:
 		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.CommitResult` {
 			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
@@ -209,4 +257,31 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 	default:
 		return fmt.Errorf("unknown command %T", cmd0)
 	}
+}
+
+func asCommitConflictError(err error) *flowstate.ErrCommitConflict {
+	// See https://connectrpc.com/docs/go/errors/#error-details
+
+	var connectErr *connect.Error
+	if !errors.As(err, &connectErr) {
+		return nil
+	}
+
+	for _, detail := range connectErr.Details() {
+		msg, valueErr := detail.Value()
+		if valueErr != nil {
+			continue // usually, errors here mean that we don't have the schema for this Protobuf message
+		}
+
+		if apiErrConflict, ok := msg.(*v1alpha1.ErrorConflict); ok {
+			conflictErr := &flowstate.ErrCommitConflict{}
+			for _, stateID := range apiErrConflict.CommittableStateIds {
+				conflictErr.Add("", flowstate.StateID(stateID), nil)
+			}
+
+			return conflictErr
+		}
+	}
+
+	return nil
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/makasim/flowstate"
+	"github.com/makasim/flowstate/exptcmd"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
 	anypb "google.golang.org/protobuf/types/known/anypb"
 )
@@ -102,6 +103,38 @@ func APICommandToCommand(apiC *anypb.Any, stateCtxs []*flowstate.StateCtx) (flow
 		cmd.Commit = apiCmd.Commit
 
 		return cmd, nil
+	case `type.googleapis.com/flowstate.v1alpha1.Stack`:
+		apiCmd := &v1alpha1.Stack{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stackedStateCtx, err := FindStateCtxByRef(apiCmd.StackedStateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+		nextStateCtx, err := FindStateCtxByRef(apiCmd.NextStateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		return exptcmd.Stack(stackedStateCtx, nextStateCtx), nil
+	case `type.googleapis.com/flowstate.v1alpha1.Unstack`:
+		apiCmd := &v1alpha1.Unstack{}
+		if err := apiC.UnmarshalTo(apiCmd); err != nil {
+			return nil, err
+		}
+
+		stateCtx, err := FindStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+		unstackStateCtx, err := FindStateCtxByRef(apiCmd.UnstackStateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		return exptcmd.Unstack(stateCtx, unstackStateCtx), nil
 	case `type.googleapis.com/flowstate.v1alpha1.Commit`:
 		apiCmd := &v1alpha1.Commit{}
 		if err := apiC.UnmarshalTo(apiCmd); err != nil {
@@ -185,6 +218,7 @@ func CommandToAPICommand(cmd flowstate.Command) (*anypb.Any, error) {
 	case *flowstate.PauseCommand:
 		return anypb.New(&v1alpha1.Pause{
 			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+			FlowId:   string(cmd1.FlowID),
 		})
 	case *flowstate.ResumeCommand:
 		return anypb.New(&v1alpha1.Resume{
@@ -207,6 +241,16 @@ func CommandToAPICommand(cmd flowstate.Command) (*anypb.Any, error) {
 	case *flowstate.NoopCommand:
 		return anypb.New(&v1alpha1.Noop{
 			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+		})
+	case *exptcmd.StackCommand:
+		return anypb.New(&v1alpha1.Stack{
+			StackedStateRef: ConvertStateCtxToRefAPI(cmd1.StackedStateCtx),
+			NextStateRef:    ConvertStateCtxToRefAPI(cmd1.NextStateCtx),
+		})
+	case *exptcmd.UnstackCommand:
+		return anypb.New(&v1alpha1.Unstack{
+			StateRef:        ConvertStateCtxToRefAPI(cmd1.StateCtx),
+			UnstackStateRef: ConvertStateCtxToRefAPI(cmd1.UnstackStateCtx),
 		})
 	case *flowstate.CommitCommand:
 		subCmds := make([]*anypb.Any, 0, len(cmd1.Commands))
@@ -259,6 +303,16 @@ func CommandToAPIResult(cmd flowstate.Command) (*anypb.Any, error) {
 		return anypb.New(&v1alpha1.NoopResult{
 			StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
 		})
+	case *exptcmd.StackCommand:
+		return anypb.New(&v1alpha1.StackResult{
+			StackedStateRef: ConvertStateCtxToRefAPI(cmd1.StackedStateCtx),
+			NextStateRef:    ConvertStateCtxToRefAPI(cmd1.NextStateCtx),
+		})
+	case *exptcmd.UnstackCommand:
+		return anypb.New(&v1alpha1.UnstackResult{
+			StateRef:        ConvertStateCtxToRefAPI(cmd1.StateCtx),
+			UnstackStateRef: ConvertStateCtxToRefAPI(cmd1.UnstackStateCtx),
+		})
 	case *flowstate.CommitCommand:
 		subResults := make([]*anypb.Any, 0, len(cmd1.Commands))
 		for _, subCmd := range cmd1.Commands {
@@ -310,6 +364,10 @@ func ConvertCommandToStateContexts(cmd flowstate.Command) []*v1alpha1.StateConte
 		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
 	case *flowstate.NoopCommand:
 		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
+	case *exptcmd.StackCommand:
+		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StackedStateCtx), ConvertStateCtxToAPI(cmd1.NextStateCtx))
+	case *exptcmd.UnstackCommand:
+		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx), ConvertStateCtxToAPI(cmd1.UnstackStateCtx))
 	case *flowstate.CommitCommand:
 		for _, subCmd := range cmd1.Commands {
 			apiStateCtxs = append(apiStateCtxs, ConvertCommandToStateContexts(subCmd)...)

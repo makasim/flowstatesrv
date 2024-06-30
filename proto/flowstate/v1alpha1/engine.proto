@@ -5,6 +5,10 @@ package flowstate.v1alpha1;
 import "flowstate/v1alpha1/state.proto";
 import "google/protobuf/any.proto";
 
+message ErrorConflict {
+  repeated string committable_state_ids = 2;
+}
+
 message DoRequest {
   repeated StateContext state_contexts = 1;
   repeated google.protobuf.Any commands = 2;

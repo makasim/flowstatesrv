@@ -2,6 +2,7 @@ package enginehandlerv1alpha1
 
 import (
 	"context"
+	"errors"
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
@@ -35,7 +36,22 @@ func (s *Handler) Do(_ context.Context, req *connect.Request[v1alpha1.DoRequest]
 		cmds = append(cmds, cmd)
 	}
 
-	if err := s.e.Do(cmds...); err != nil {
+	conflictErr := &flowstate.ErrCommitConflict{}
+	if err := s.e.Do(cmds...); errors.As(err, conflictErr) {
+		apiConflictErr := &v1alpha1.ErrorConflict{}
+		for _, stateID := range conflictErr.TaskIDs() {
+			apiConflictErr.CommittableStateIds = append(apiConflictErr.CommittableStateIds, string(stateID))
+		}
+		ed, edErr := connect.NewErrorDetail(apiConflictErr)
+		if edErr != nil {
+			return nil, connect.NewError(connect.CodeInternal, edErr)
+		}
+
+		connErr := connect.NewError(connect.CodeAborted, err)
+		connErr.AddDetail(ed)
+
+		return nil, connErr
+	} else if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
