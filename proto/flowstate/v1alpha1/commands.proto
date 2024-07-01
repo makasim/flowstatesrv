@@ -75,22 +75,26 @@ message NoopResult {
   StateRef state_ref = 1;
 }
 
-message Stack {
-  StateRef stacked_state_ref = 1;
-  StateRef next_state_ref = 2;
+message Serialize {
+  StateRef serializable_state_ref = 1;
+  StateRef state_ref = 2;
+  string annotation = 3;
 }
 
-message StackResult {
-  StateRef stacked_state_ref = 1;
-  StateRef next_state_ref = 2;
+message SerializeResult {
+  StateRef serializable_state_ref = 1;
+  StateRef state_ref = 2;
+  string annotation = 3;
 }
 
-message Unstack {
-  StateRef state_ref = 1;
-  StateRef unstack_state_ref = 2;
+message Deserialize {
+  StateRef deserialized_state_ref = 1;
+  StateRef state_ref = 2;
+  string annotation = 3;
 }
 
-message UnstackResult {
-  StateRef state_ref = 1;
-  StateRef unstack_state_ref = 2;
+message DeserializeResult {
+  StateRef deserialized_state_ref = 1;
+  StateRef state_ref = 2;
+  string annotation = 3;
 }

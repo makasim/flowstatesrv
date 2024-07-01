@@ -10,7 +10,6 @@ import (
 	"connectrpc.com/connect"
 	"github.com/bufbuild/httplb"
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstate/exptcmd"
 	"github.com/makasim/flowstate/stddoer"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1/flowv1alpha1connect"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
@@ -43,9 +42,8 @@ func New(serverHttpHost string) *Driver {
 		stddoer.Resume(),
 		stddoer.End(),
 		stddoer.Noop(),
-
-		exptcmd.NewStacker(),
-		exptcmd.UnstackDoer(),
+		stddoer.NewSerializer(),
+		stddoer.NewDeserializer(),
 
 		newFlowGetter(d.FlowRegistry),
 		newWatcher(d.ec),

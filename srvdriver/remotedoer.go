@@ -7,7 +7,6 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstate/exptcmd"
 	"github.com/makasim/flowstatesrv/convertorv1alpha1"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
@@ -190,34 +189,35 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
-	case *exptcmd.StackCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.StackResult` {
+	case *flowstate.SerializeCommand:
+		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.SerializeResult` {
 			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
 		}
 
-		apiRes := &v1alpha1.StackResult{}
+		apiRes := &v1alpha1.SerializeResult{}
 		if err := res.UnmarshalTo(apiRes); err != nil {
 			return err
 		}
 
-		stackedStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StackedStateRef, stateCtxs)
+		serializableStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.SerializableStateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
-		nextStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.NextStateRef, stateCtxs)
+		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
 
-		stackedStateCtx.CopyTo(cmd.StackedStateCtx)
-		nextStateCtx.CopyTo(cmd.NextStateCtx)
+		serializableStateCtx.CopyTo(cmd.SerializableStateCtx)
+		stateCtx.CopyTo(cmd.StateCtx)
+		cmd.Annotation = apiRes.Annotation
 		return nil
-	case *exptcmd.UnstackCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.UnstackResult` {
+	case *flowstate.DeserializeCommand:
+		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.DeserializeResult` {
 			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
 		}
 
-		apiRes := &v1alpha1.UnstackResult{}
+		apiRes := &v1alpha1.DeserializeResult{}
 		if err := res.UnmarshalTo(apiRes); err != nil {
 			return err
 		}
@@ -226,13 +226,14 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		if err != nil {
 			return err
 		}
-		unstackStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.UnstackStateRef, stateCtxs)
+		deserializedStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.DeserializedStateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
 
 		stateCtx.CopyTo(cmd.StateCtx)
-		unstackStateCtx.CopyTo(cmd.UnstackStateCtx)
+		deserializedStateCtx.CopyTo(cmd.DeserializedStateCtx)
+		cmd.Annotation = apiRes.Annotation
 		return nil
 	case *flowstate.CommitCommand:
 		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.CommitResult` {
