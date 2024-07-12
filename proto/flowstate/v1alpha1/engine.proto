@@ -2,21 +2,21 @@ syntax = "proto3";
 
 package flowstate.v1alpha1;
 
-import "flowstate/v1alpha1/state.proto";
-import "google/protobuf/any.proto";
+import "flowstate/state/v1/state.proto";
+import "flowstate/command/v1/commands.proto";
 
 message ErrorConflict {
   repeated string committable_state_ids = 2;
 }
 
 message DoRequest {
-  repeated StateContext state_contexts = 1;
-  repeated google.protobuf.Any commands = 2;
+  repeated flowstate.state.v1.StateContext state_contexts = 1;
+  repeated flowstate.command.v1.AnyCommand commands = 3;
 }
 
 message DoResponse {
-  repeated StateContext state_contexts = 1;
-  repeated google.protobuf.Any results = 2;
+  repeated flowstate.state.v1.StateContext state_contexts = 1;
+  repeated flowstate.command.v1.AnyResult results = 3;
 }
 
 message WatchRequest {
@@ -26,7 +26,7 @@ message WatchRequest {
 }
 
 message WatchResponse {
-  State state = 1;
+  flowstate.state.v1.State state = 1;
 }
 
 service EngineService {

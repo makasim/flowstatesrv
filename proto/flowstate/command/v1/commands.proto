@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package flowstate.command.v1;
+
+import "flowstate/state/v1/state.proto";
+
+message AnyCommand {
+  oneof command {
+    Transit transit = 1;
+    Pause pause = 2;
+    Resume resume = 3;
+    End end = 4;
+    Execute execute = 5;
+    Delay delay = 6;
+    Commit commit = 7;
+    Noop noop = 8;
+    Serialize serialize = 9;
+    Deserialize deserialize = 10;
+  }
+}
+
+message AnyResult {
+  oneof result {
+    TransitResult transit = 1;
+    PauseResult pause = 2;
+    ResumeResult resume = 3;
+    EndResult end = 4;
+    ExecuteResult execute = 5;
+    DelayResult delay = 6;
+    CommitResult commit = 7;
+    NoopResult noop = 8;
+    SerializeResult serialize = 9;
+    DeserializeResult deserialize = 10;
+  }
+}
+
+message Transit {
+  flowstate.state.v1.StateRef state_ref = 1;
+  string flow_id = 2;
+}
+
+message TransitResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message Pause {
+  message WithTransit {
+    string flow_id = 1;
+  }
+
+  flowstate.state.v1.StateRef state_ref = 1;
+  WithTransit with_transit = 2;
+}
+
+message PauseResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message Resume {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message ResumeResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message End {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message EndResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message Execute {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message ExecuteResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message Delay {
+  message WithCommit {
+    bool commit = 1;
+  }
+
+  flowstate.state.v1.StateRef state_ref = 1;
+  string duration = 2;
+  WithCommit with_commit = 3;
+}
+
+message DelayResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+  string duration = 2;
+  bool commit = 3;
+}
+
+message Commit {
+  repeated AnyCommand commands = 2;
+}
+
+message CommitResult {
+  repeated AnyResult results = 3;
+}
+
+message Noop {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message NoopResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+}
+
+message Serialize {
+  flowstate.state.v1.StateRef serializable_state_ref = 1;
+  flowstate.state.v1.StateRef state_ref = 2;
+  string annotation = 3;
+}
+
+message SerializeResult {
+  flowstate.state.v1.StateRef serializable_state_ref = 1;
+  flowstate.state.v1.StateRef state_ref = 2;
+  string annotation = 3;
+}
+
+message Deserialize {
+  flowstate.state.v1.StateRef deserialized_state_ref = 1;
+  flowstate.state.v1.StateRef state_ref = 2;
+  string annotation = 3;
+}
+
+message DeserializeResult {
+  flowstate.state.v1.StateRef deserialized_state_ref = 1;
+  flowstate.state.v1.StateRef state_ref = 2;
+  string annotation = 3;
+}
