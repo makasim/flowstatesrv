@@ -7,10 +7,10 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstatesrv/convertorv1alpha1"
+	"github.com/makasim/flowstatesrv/convertorv1"
+	commandv1 "github.com/makasim/flowstatesrv/protogen/flowstate/command/v1"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
-	anypb "google.golang.org/protobuf/types/known/anypb"
 )
 
 type RemoteDoer struct {
@@ -47,15 +47,15 @@ func (d *RemoteDoer) Do(cmd0 flowstate.Command) error {
 }
 
 func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
-	apiCmd, err := convertorv1alpha1.CommandToAPICommand(cmd0)
+	apiCmd, err := convertorv1.CommandToAPICommand(cmd0)
 	if err != nil {
 		return err
 	}
-	apiStateCtxs := convertorv1alpha1.ConvertCommandToStateContexts(cmd0)
+	apiStateCtxs := convertorv1.ConvertCommandToStateContexts(cmd0)
 
 	resp, err := d.ec.Do(context.Background(), connect.NewRequest(&v1alpha1.DoRequest{
 		StateContexts: apiStateCtxs,
-		Commands:      []*anypb.Any{apiCmd},
+		Commands:      []*commandv1.AnyCommand{apiCmd},
 	}))
 	if conflictErr := asCommitConflictError(err); conflictErr != nil {
 		return conflictErr
@@ -75,7 +75,7 @@ func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1alpha1.DoRespon
 		return fmt.Errorf("commands and results count mismatch")
 	}
 
-	stateCtxs := convertorv1alpha1.ConvertAPIToStateCtxs(resp.StateContexts)
+	stateCtxs := convertorv1.ConvertAPIToStateCtxs(resp.StateContexts)
 	for i, cmd0 := range cmds {
 		if err := syncCommandWithResult(cmd0, resp.Results[i], stateCtxs); err != nil {
 			return err
@@ -85,19 +85,15 @@ func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1alpha1.DoRespon
 	return nil
 }
 
-func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*flowstate.StateCtx) error {
+func syncCommandWithResult(cmd0 flowstate.Command, res *commandv1.AnyResult, stateCtxs []*flowstate.StateCtx) error {
 	switch cmd := cmd0.(type) {
 	case *flowstate.TransitCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.TransitResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetTransit() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.TransitResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
-
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		apiRes := res.GetTransit()
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -105,16 +101,13 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
 	case *flowstate.PauseCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.PauseResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetPause() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.PauseResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetPause()
 
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -122,16 +115,13 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
 	case *flowstate.ResumeCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.ResumeResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetResume() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.ResumeResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetResume()
 
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -139,16 +129,13 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
 	case *flowstate.EndCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.EndResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetEnd() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.EndResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetEnd()
 
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -156,16 +143,13 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
 	case *flowstate.ExecuteCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.ExecuteResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetExecute() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.ExecuteResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetExecute()
 
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -173,16 +157,13 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
 	case *flowstate.DelayCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.DelayResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetDelay() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.DelayResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetDelay()
 
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -190,20 +171,17 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
 	case *flowstate.SerializeCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.SerializeResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetSerialize() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.SerializeResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetSerialize()
 
-		serializableStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.SerializableStateRef, stateCtxs)
+		serializableStateCtx, err := convertorv1.FindStateCtxByRef(apiRes.SerializableStateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -213,20 +191,17 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		cmd.Annotation = apiRes.Annotation
 		return nil
 	case *flowstate.DeserializeCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.DeserializeResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetDeserialize() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.DeserializeResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetDeserialize()
 
-		stateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
-		deserializedStateCtx, err := convertorv1alpha1.FindStateCtxByRef(apiRes.DeserializedStateRef, stateCtxs)
+		deserializedStateCtx, err := convertorv1.FindStateCtxByRef(apiRes.DeserializedStateRef, stateCtxs)
 		if err != nil {
 			return err
 		}
@@ -236,14 +211,11 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *anypb.Any, stateCtxs []*
 		cmd.Annotation = apiRes.Annotation
 		return nil
 	case *flowstate.CommitCommand:
-		if res.TypeUrl != `type.googleapis.com/flowstate.v1alpha1.CommitResult` {
-			return fmt.Errorf("unexpected result type %s", res.TypeUrl)
+		if res.GetCommit() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
 		}
 
-		apiRes := &v1alpha1.CommitResult{}
-		if err := res.UnmarshalTo(apiRes); err != nil {
-			return err
-		}
+		apiRes := res.GetCommit()
 
 		if len(apiRes.Results) != len(cmd.Commands) {
 			return fmt.Errorf("commands and results count mismatch")

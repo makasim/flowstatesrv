@@ -7,7 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstatesrv/convertorv1alpha1"
+	"github.com/makasim/flowstatesrv/convertorv1"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
 )
@@ -99,7 +99,7 @@ func (lis *listener) listen() {
 	}()
 
 	for srvS.Receive() {
-		state := convertorv1alpha1.ConvertAPIToState(srvS.Msg().State)
+		state := convertorv1.ConvertAPIToState(srvS.Msg().State)
 		select {
 		case lis.watchCh <- state:
 			continue

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package flowstate.v1alpha1;
+package flowstate.state.v1;
 
 message StateRef {
   string id = 1;

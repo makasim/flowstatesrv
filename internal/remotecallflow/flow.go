@@ -5,7 +5,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstatesrv/convertorv1alpha1"
+	"github.com/makasim/flowstatesrv/convertorv1"
 	flowv1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1/flowv1alpha1connect"
 )
@@ -24,7 +24,7 @@ func New(fc flowv1alpha1connect.FlowServiceClient) *Flow {
 }
 
 func (f *Flow) Execute(stateCtx *flowstate.StateCtx, _ *flowstate.Engine) (flowstate.Command, error) {
-	apiStateCtx := convertorv1alpha1.ConvertStateCtxToAPI(stateCtx)
+	apiStateCtx := convertorv1.ConvertStateCtxToAPI(stateCtx)
 
 	resp, err := f.fc.Execute(context.Background(), connect.NewRequest(&flowv1alpha1.ExecuteRequest{
 		StateContext: apiStateCtx,
@@ -33,10 +33,10 @@ func (f *Flow) Execute(stateCtx *flowstate.StateCtx, _ *flowstate.Engine) (flows
 		return nil, err
 	}
 
-	resStateCtx := convertorv1alpha1.ConvertAPIToStateCtx(resp.Msg.StateContext)
+	resStateCtx := convertorv1.ConvertAPIToStateCtx(resp.Msg.StateContext)
 	resStateCtx.CopyTo(stateCtx)
 
-	cmd, err := convertorv1alpha1.APICommandToCommand(resp.Msg.Command, []*flowstate.StateCtx{stateCtx})
+	cmd, err := convertorv1.APICommandToCommand(resp.Msg.Command, []*flowstate.StateCtx{stateCtx})
 	if err != nil {
 		return nil, err
 	}

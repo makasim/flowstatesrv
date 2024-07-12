@@ -6,7 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstatesrv/convertorv1alpha1"
+	"github.com/makasim/flowstatesrv/convertorv1"
 	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1"
 )
 
@@ -21,7 +21,7 @@ func newHandler(e *flowstate.Engine) *Handler {
 }
 
 func (h *Handler) Execute(_ context.Context, req *connect.Request[v1alpha1.ExecuteRequest]) (*connect.Response[v1alpha1.ExecuteResponse], error) {
-	stateCtx := convertorv1alpha1.ConvertAPIToStateCtx(req.Msg.StateContext)
+	stateCtx := convertorv1.ConvertAPIToStateCtx(req.Msg.StateContext)
 	resStateCtx := stateCtx.CopyTo(&flowstate.StateCtx{})
 	go func() {
 		if err := h.e.Execute(stateCtx); err != nil {
@@ -29,13 +29,13 @@ func (h *Handler) Execute(_ context.Context, req *connect.Request[v1alpha1.Execu
 		}
 	}()
 
-	noopCmd, err := convertorv1alpha1.CommandToAPICommand(flowstate.End(resStateCtx))
+	noopCmd, err := convertorv1.CommandToAPICommand(flowstate.End(resStateCtx))
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	return connect.NewResponse(&v1alpha1.ExecuteResponse{
-		StateContext: convertorv1alpha1.ConvertStateCtxToAPI(resStateCtx),
+		StateContext: convertorv1.ConvertStateCtxToAPI(resStateCtx),
 		Command:      noopCmd,
 	}), nil
 }
