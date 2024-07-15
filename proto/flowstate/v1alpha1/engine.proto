@@ -11,11 +11,13 @@ message ErrorConflict {
 
 message DoRequest {
   repeated flowstate.state.v1.StateContext state_contexts = 1;
+  repeated flowstate.state.v1.Data data = 2;
   repeated flowstate.command.v1.AnyCommand commands = 3;
 }
 
 message DoResponse {
   repeated flowstate.state.v1.StateContext state_contexts = 1;
+  repeated flowstate.state.v1.Data data = 2;
   repeated flowstate.command.v1.AnyResult results = 3;
 }
 

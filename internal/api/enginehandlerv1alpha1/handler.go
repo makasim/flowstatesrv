@@ -26,10 +26,14 @@ func (s *Handler) Do(_ context.Context, req *connect.Request[v1alpha1.DoRequest]
 	for _, apiS := range req.Msg.StateContexts {
 		stateCtxs = append(stateCtxs, convertorv1.ConvertAPIToStateCtx(apiS))
 	}
+	datas := make([]*flowstate.Data, 0, len(req.Msg.Data))
+	for _, apiD := range req.Msg.Data {
+		datas = append(datas, convertorv1.ConvertAPIToData(apiD))
+	}
 
 	cmds := make([]flowstate.Command, 0, len(req.Msg.Commands))
 	for _, apiC := range req.Msg.Commands {
-		cmd, err := convertorv1.APICommandToCommand(apiC, stateCtxs)
+		cmd, err := convertorv1.APICommandToCommand(apiC, stateCtxs, datas)
 		if err != nil {
 			return nil, connect.NewError(connect.CodeInvalidArgument, err)
 		}
@@ -67,6 +71,7 @@ func (s *Handler) Do(_ context.Context, req *connect.Request[v1alpha1.DoRequest]
 
 	return connect.NewResponse(&v1alpha1.DoResponse{
 		StateContexts: convertorv1.ConvertStateCtxsToAPI(stateCtxs),
+		Data:          convertorv1.ConvertDatasToAPI(datas),
 		Results:       results,
 	}), nil
 }

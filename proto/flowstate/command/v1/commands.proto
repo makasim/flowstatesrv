@@ -16,6 +16,10 @@ message AnyCommand {
     Noop noop = 8;
     Serialize serialize = 9;
     Deserialize deserialize = 10;
+    StoreData store_data = 11;
+    GetData get_data = 12;
+    ReferenceData reference_data = 13;
+    DereferenceData dereference_data = 14;
   }
 }
 
@@ -31,6 +35,10 @@ message AnyResult {
     NoopResult noop = 8;
     SerializeResult serialize = 9;
     DeserializeResult deserialize = 10;
+    StoreDataResult store_data = 11;
+    GetDataResult get_data = 12;
+    ReferenceDataResult reference_data = 13;
+    DereferenceDataResult dereference_data = 14;
   }
 }
 
@@ -134,4 +142,44 @@ message DeserializeResult {
   flowstate.state.v1.StateRef deserialized_state_ref = 1;
   flowstate.state.v1.StateRef state_ref = 2;
   string annotation = 3;
+}
+
+message ReferenceData {
+  flowstate.state.v1.StateRef state_ref = 1;
+  flowstate.state.v1.DataRef data_ref = 2;
+  string annotation = 3;
+}
+
+message DereferenceDataResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+  flowstate.state.v1.DataRef data_ref = 2;
+  string annotation = 3;
+}
+
+message DereferenceData {
+  flowstate.state.v1.StateRef state_ref = 1;
+  flowstate.state.v1.DataRef data_ref = 2;
+  string annotation = 3;
+}
+
+message ReferenceDataResult {
+  flowstate.state.v1.StateRef state_ref = 1;
+  flowstate.state.v1.DataRef data_ref = 2;
+  string annotation = 3;
+}
+
+message GetData {
+  flowstate.state.v1.DataRef data_ref = 1;
+}
+
+message GetDataResult {
+  flowstate.state.v1.DataRef data_ref = 1;
+}
+
+message StoreData {
+  flowstate.state.v1.DataRef data_ref = 1;
+}
+
+message StoreDataResult {
+  flowstate.state.v1.DataRef data_ref = 1;
 }
