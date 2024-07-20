@@ -8,17 +8,17 @@ import (
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
-	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
+	v1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 )
 
 type Watcher struct {
-	ec flowstatev1alpha1connect.EngineServiceClient
+	sc flowstatev1connect.ServerServiceClient
 }
 
-func newWatcher(ec flowstatev1alpha1connect.EngineServiceClient) *Watcher {
+func newWatcher(sc flowstatev1connect.ServerServiceClient) *Watcher {
 	return &Watcher{
-		ec: ec,
+		sc: sc,
 	}
 }
 
@@ -41,7 +41,7 @@ func (d *Watcher) Do(cmd0 flowstate.Command) error {
 		labels:      make(map[string]string),
 		sinceLatest: cmd.SinceLatest,
 
-		ec:       d.ec,
+		ec:       d.sc,
 		watchCh:  make(chan flowstate.State, 1),
 		closeCh:  make(chan struct{}),
 		closedCh: make(chan struct{}),
@@ -61,7 +61,7 @@ type listener struct {
 	sinceLatest bool
 	labels      map[string]string
 
-	ec       flowstatev1alpha1connect.EngineServiceClient
+	ec       flowstatev1connect.ServerServiceClient
 	watchCh  chan flowstate.State
 	closeCh  chan struct{}
 	closedCh chan struct{}
@@ -81,7 +81,7 @@ func (lis *listener) listen() {
 
 	wCtx, wCtxCancel := context.WithCancel(context.Background())
 
-	srvS, err := lis.ec.Watch(wCtx, connect.NewRequest(&v1alpha1.WatchRequest{
+	srvS, err := lis.ec.WatchStates(wCtx, connect.NewRequest(&v1.WatchStatesRequest{
 		SinceRev:    lis.sinceRev,
 		SinceLatest: lis.sinceLatest,
 		Labels:      lis.labels,

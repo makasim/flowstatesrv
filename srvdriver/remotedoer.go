@@ -8,19 +8,18 @@ import (
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
-	commandv1 "github.com/makasim/flowstatesrv/protogen/flowstate/command/v1"
-	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
+	v1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 )
 
 type RemoteDoer struct {
 	e  *flowstate.Engine
-	ec flowstatev1alpha1connect.EngineServiceClient
+	sc flowstatev1connect.ServerServiceClient
 }
 
-func newRemoteDoer(ec flowstatev1alpha1connect.EngineServiceClient) *RemoteDoer {
+func newRemoteDoer(sc flowstatev1connect.ServerServiceClient) *RemoteDoer {
 	return &RemoteDoer{
-		ec: ec,
+		sc: sc,
 	}
 }
 
@@ -58,10 +57,10 @@ func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
 	apiStateCtxs := convertorv1.ConvertCommandToStateContexts(cmd0)
 	apiDatas := convertorv1.ConvertCommandToDatas(cmd0)
 
-	resp, err := d.ec.Do(context.Background(), connect.NewRequest(&v1alpha1.DoRequest{
+	resp, err := d.sc.DoCommand(context.Background(), connect.NewRequest(&v1.DoCommandRequest{
 		StateContexts: apiStateCtxs,
 		Data:          apiDatas,
-		Commands:      []*commandv1.AnyCommand{apiCmd},
+		Commands:      []*v1.AnyCommand{apiCmd},
 	}))
 	if conflictErr := asCommitConflictError(err); conflictErr != nil {
 		return conflictErr
@@ -76,7 +75,7 @@ func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
 	return nil
 }
 
-func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1alpha1.DoResponse) error {
+func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1.DoCommandResponse) error {
 	if len(cmds) != len(resp.Results) {
 		return fmt.Errorf("commands and results count mismatch")
 	}
@@ -93,7 +92,7 @@ func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1alpha1.DoRespon
 	return nil
 }
 
-func syncCommandWithResult(cmd0 flowstate.Command, res *commandv1.AnyResult, stateCtxs []*flowstate.StateCtx, datas []*flowstate.Data) error {
+func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs []*flowstate.StateCtx, datas []*flowstate.Data) error {
 	switch cmd := cmd0.(type) {
 	case *flowstate.TransitCommand:
 		if res.GetTransit() == nil {
@@ -318,7 +317,7 @@ func asCommitConflictError(err error) *flowstate.ErrCommitConflict {
 			continue // usually, errors here mean that we don't have the schema for this Protobuf message
 		}
 
-		if apiErrConflict, ok := msg.(*v1alpha1.ErrorConflict); ok {
+		if apiErrConflict, ok := msg.(*v1.ErrorConflict); ok {
 			conflictErr := &flowstate.ErrCommitConflict{}
 			for _, stateID := range apiErrConflict.CommittableStateIds {
 				conflictErr.Add("", flowstate.StateID(stateID), nil)

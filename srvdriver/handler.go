@@ -7,7 +7,7 @@ import (
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
-	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1"
+	clientv1 "github.com/makasim/flowstatesrv/protogen/flowstate/client/v1"
 )
 
 type Handler struct {
@@ -20,7 +20,7 @@ func newHandler(e *flowstate.Engine) *Handler {
 	}
 }
 
-func (h *Handler) Execute(_ context.Context, req *connect.Request[v1alpha1.ExecuteRequest]) (*connect.Response[v1alpha1.ExecuteResponse], error) {
+func (h *Handler) Execute(_ context.Context, req *connect.Request[clientv1.ExecuteRequest]) (*connect.Response[clientv1.ExecuteResponse], error) {
 	stateCtx := convertorv1.ConvertAPIToStateCtx(req.Msg.StateContext)
 	resStateCtx := stateCtx.CopyTo(&flowstate.StateCtx{})
 	go func() {
@@ -34,7 +34,7 @@ func (h *Handler) Execute(_ context.Context, req *connect.Request[v1alpha1.Execu
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&v1alpha1.ExecuteResponse{
+	return connect.NewResponse(&clientv1.ExecuteResponse{
 		StateContext: convertorv1.ConvertStateCtxToAPI(resStateCtx),
 		Command:      noopCmd,
 	}), nil

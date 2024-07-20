@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package flowstate.client.v1;
+
+import "flowstate/v1/state.proto";
+import "flowstate/v1/commands.proto";
+
+message ExecuteRequest {
+  flowstate.v1.StateContext state_context = 1;
+}
+
+message ExecuteResponse {
+  flowstate.v1.StateContext state_context = 1;
+  flowstate.v1.AnyCommand command = 2;
+}
+
+service ClientService {
+  rpc Execute(ExecuteRequest) returns (ExecuteResponse) {}
+}
