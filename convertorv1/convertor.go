@@ -20,7 +20,17 @@ func FindStateCtxByRef(ref *v1.StateRef, stateCtxs []*flowstate.StateCtx) (*flow
 	return nil, fmt.Errorf("there is no state ctx provided for ref: %s:%d", ref.Id, ref.Rev)
 }
 
-func APICommandToCommand(apiAnyCmd *commandv1.AnyCommand, stateCtxs []*flowstate.StateCtx) (flowstate.Command, error) {
+func FindDataByRef(ref *v1.DataRef, datas []*flowstate.Data) (*flowstate.Data, error) {
+	for _, d := range datas {
+		if d.ID == flowstate.DataID(ref.Id) && d.Rev == ref.Rev {
+			return d, nil
+		}
+	}
+
+	return nil, fmt.Errorf("there is no data provided for ref: %s:%d", ref.Id, ref.Rev)
+}
+
+func APICommandToCommand(apiAnyCmd *commandv1.AnyCommand, stateCtxs []*flowstate.StateCtx, datas []*flowstate.Data) (flowstate.Command, error) {
 	switch {
 	case apiAnyCmd.GetTransit() != nil:
 		apiCmd := apiAnyCmd.GetTransit()
@@ -124,7 +134,7 @@ func APICommandToCommand(apiAnyCmd *commandv1.AnyCommand, stateCtxs []*flowstate
 
 		cmtCmds := make([]flowstate.Command, 0, len(apiCmd.Commands))
 		for _, apiCmtCmd := range apiCmd.Commands {
-			cmtCmd, err := APICommandToCommand(apiCmtCmd, stateCtxs)
+			cmtCmd, err := APICommandToCommand(apiCmtCmd, stateCtxs, datas)
 			if err != nil {
 				return nil, err
 			}
@@ -133,6 +143,51 @@ func APICommandToCommand(apiAnyCmd *commandv1.AnyCommand, stateCtxs []*flowstate
 		}
 
 		return flowstate.Commit(cmtCmds...), nil
+
+	case apiAnyCmd.GetStoreData() != nil:
+		apiCmd := apiAnyCmd.GetStoreData()
+
+		d, err := FindDataByRef(apiCmd.DataRef, datas)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.StoreData(d), nil
+	case apiAnyCmd.GetGetData() != nil:
+		apiCmd := apiAnyCmd.GetGetData()
+
+		d, err := FindDataByRef(apiCmd.DataRef, datas)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.GetData(d), nil
+	case apiAnyCmd.GetReferenceData() != nil:
+		apiCmd := apiAnyCmd.GetReferenceData()
+
+		stateCtx, err := FindStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+		d, err := FindDataByRef(apiCmd.DataRef, datas)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.ReferenceData(stateCtx, d, apiCmd.Annotation), nil
+	case apiAnyCmd.GetDereferenceData() != nil:
+		apiCmd := apiAnyCmd.GetDereferenceData()
+
+		stateCtx, err := FindStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+		d, err := FindDataByRef(apiCmd.DataRef, datas)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.DereferenceData(stateCtx, d, apiCmd.Annotation), nil
 	default:
 		return nil, fmt.Errorf("unknown command %T", apiAnyCmd.Command)
 	}
@@ -187,6 +242,14 @@ func ConvertAPIToTransition(apiT *v1.Transition) flowstate.Transition {
 		ToID:        flowstate.FlowID(apiT.To),
 		Annotations: copyMap(apiT.Annotations),
 	}
+}
+
+func ConvertAPIToDatas(apiDatas []*v1.Data) []*flowstate.Data {
+	datas := make([]*flowstate.Data, 0, len(apiDatas))
+	for _, apiD := range apiDatas {
+		datas = append(datas, ConvertAPIToData(apiD))
+	}
+	return datas
 }
 
 func CommandToAPICommand(cmd flowstate.Command) (*commandv1.AnyCommand, error) {
@@ -303,6 +366,42 @@ func CommandToAPICommand(cmd flowstate.Command) (*commandv1.AnyCommand, error) {
 				},
 			},
 		}, nil
+	case *flowstate.StoreDataCommand:
+		return &commandv1.AnyCommand{
+			Command: &commandv1.AnyCommand_StoreData{
+				StoreData: &commandv1.StoreData{
+					DataRef: ConvertDataToRefAPI(cmd1.Data),
+				},
+			},
+		}, nil
+	case *flowstate.GetDataCommand:
+		return &commandv1.AnyCommand{
+			Command: &commandv1.AnyCommand_GetData{
+				GetData: &commandv1.GetData{
+					DataRef: ConvertDataToRefAPI(cmd1.Data),
+				},
+			},
+		}, nil
+	case *flowstate.ReferenceDataCommand:
+		return &commandv1.AnyCommand{
+			Command: &commandv1.AnyCommand_ReferenceData{
+				ReferenceData: &commandv1.ReferenceData{
+					StateRef:   ConvertStateCtxToRefAPI(cmd1.StateCtx),
+					DataRef:    ConvertDataToRefAPI(cmd1.Data),
+					Annotation: cmd1.Annotation,
+				},
+			},
+		}, nil
+	case *flowstate.DereferenceDataCommand:
+		return &commandv1.AnyCommand{
+			Command: &commandv1.AnyCommand_DereferenceData{
+				DereferenceData: &commandv1.DereferenceData{
+					StateRef:   ConvertStateCtxToRefAPI(cmd1.StateCtx),
+					DataRef:    ConvertDataToRefAPI(cmd1.Data),
+					Annotation: cmd1.Annotation,
+				},
+			},
+		}, nil
 	default:
 		return nil, fmt.Errorf("unknown command type %T", cmd)
 	}
@@ -406,6 +505,42 @@ func CommandToAPIResult(cmd flowstate.Command) (*commandv1.AnyResult, error) {
 				},
 			},
 		}, nil
+	case *flowstate.StoreDataCommand:
+		return &commandv1.AnyResult{
+			Result: &commandv1.AnyResult_StoreData{
+				StoreData: &commandv1.StoreDataResult{
+					DataRef: ConvertDataToRefAPI(cmd1.Data),
+				},
+			},
+		}, nil
+	case *flowstate.GetDataCommand:
+		return &commandv1.AnyResult{
+			Result: &commandv1.AnyResult_GetData{
+				GetData: &commandv1.GetDataResult{
+					DataRef: ConvertDataToRefAPI(cmd1.Data),
+				},
+			},
+		}, nil
+	case *flowstate.ReferenceDataCommand:
+		return &commandv1.AnyResult{
+			Result: &commandv1.AnyResult_ReferenceData{
+				ReferenceData: &commandv1.ReferenceDataResult{
+					StateRef:   ConvertStateCtxToRefAPI(cmd1.StateCtx),
+					DataRef:    ConvertDataToRefAPI(cmd1.Data),
+					Annotation: cmd1.Annotation,
+				},
+			},
+		}, nil
+	case *flowstate.DereferenceDataCommand:
+		return &commandv1.AnyResult{
+			Result: &commandv1.AnyResult_DereferenceData{
+				DereferenceData: &commandv1.DereferenceDataResult{
+					StateRef:   ConvertStateCtxToRefAPI(cmd1.StateCtx),
+					DataRef:    ConvertDataToRefAPI(cmd1.Data),
+					Annotation: cmd1.Annotation,
+				},
+			},
+		}, nil
 	default:
 		return nil, fmt.Errorf("unknown command type %T", cmd)
 	}
@@ -451,6 +586,10 @@ func ConvertCommandToStateContexts(cmd flowstate.Command) []*v1.StateContext {
 		for _, subCmd := range cmd1.Commands {
 			apiStateCtxs = append(apiStateCtxs, ConvertCommandToStateContexts(subCmd)...)
 		}
+	case *flowstate.ReferenceDataCommand:
+		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
+	case *flowstate.DereferenceDataCommand:
+		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
 	default:
 		return nil
 	}
@@ -509,6 +648,64 @@ func ConvertTransitionToAPI(ts flowstate.Transition) *v1.Transition {
 		From:        string(ts.FromID),
 		To:          string(ts.ToID),
 		Annotations: copyMap(ts.Annotations),
+	}
+}
+
+func ConvertCommandToDatas(cmd flowstate.Command) []*v1.Data {
+	apiDatas := make([]*v1.Data, 0)
+
+	switch cmd1 := cmd.(type) {
+	case *flowstate.StoreDataCommand:
+		apiDatas = append(apiDatas, ConvertDataToAPI(cmd1.Data))
+	case *flowstate.GetDataCommand:
+		apiDatas = append(apiDatas, ConvertDataToAPI(cmd1.Data))
+	case *flowstate.ReferenceDataCommand:
+		apiDatas = append(apiDatas, ConvertDataToAPI(cmd1.Data))
+	case *flowstate.DereferenceDataCommand:
+		apiDatas = append(apiDatas, ConvertDataToAPI(cmd1.Data))
+	case *flowstate.CommitCommand:
+		for _, subCmd := range cmd1.Commands {
+			apiDatas = append(apiDatas, ConvertCommandToDatas(subCmd)...)
+		}
+	default:
+		return nil
+	}
+
+	slices.CompactFunc(apiDatas, func(l, r *v1.Data) bool {
+		return l.Id == r.Id && l.Rev == r.Rev
+	})
+
+	return apiDatas
+}
+
+func ConvertAPIToData(data *v1.Data) *flowstate.Data {
+	return &flowstate.Data{
+		ID:  flowstate.DataID(data.Id),
+		Rev: data.Rev,
+		B:   append([]byte(nil), data.B...),
+	}
+}
+
+func ConvertDataToAPI(data *flowstate.Data) *v1.Data {
+	return &v1.Data{
+		Id:  string(data.ID),
+		Rev: data.Rev,
+		B:   append([]byte(nil), data.B...),
+	}
+}
+
+func ConvertDatasToAPI(datas []*flowstate.Data) []*v1.Data {
+	apiD := make([]*v1.Data, 0, len(datas))
+	for _, d := range datas {
+		apiD = append(apiD, ConvertDataToAPI(d))
+	}
+	return apiD
+}
+
+func ConvertDataToRefAPI(data *flowstate.Data) *v1.DataRef {
+	return &v1.DataRef{
+		Id:  string(data.ID),
+		Rev: data.Rev,
 	}
 }
 

@@ -41,6 +41,10 @@ func (d *RemoteDoer) Do(cmd0 flowstate.Command) error {
 		return d.do(cmd0)
 	case *flowstate.GetWatcherCommand:
 		return d.do(cmd0)
+	case *flowstate.StoreDataCommand:
+		return d.do(cmd0)
+	case *flowstate.GetDataCommand:
+		return d.do(cmd0)
 	default:
 		return flowstate.ErrCommandNotSupported
 	}
@@ -52,9 +56,11 @@ func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
 		return err
 	}
 	apiStateCtxs := convertorv1.ConvertCommandToStateContexts(cmd0)
+	apiDatas := convertorv1.ConvertCommandToDatas(cmd0)
 
 	resp, err := d.ec.Do(context.Background(), connect.NewRequest(&v1alpha1.DoRequest{
 		StateContexts: apiStateCtxs,
+		Data:          apiDatas,
 		Commands:      []*commandv1.AnyCommand{apiCmd},
 	}))
 	if conflictErr := asCommitConflictError(err); conflictErr != nil {
@@ -76,8 +82,10 @@ func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1alpha1.DoRespon
 	}
 
 	stateCtxs := convertorv1.ConvertAPIToStateCtxs(resp.StateContexts)
+	datas := convertorv1.ConvertAPIToDatas(resp.Data)
+
 	for i, cmd0 := range cmds {
-		if err := syncCommandWithResult(cmd0, resp.Results[i], stateCtxs); err != nil {
+		if err := syncCommandWithResult(cmd0, resp.Results[i], stateCtxs, datas); err != nil {
 			return err
 		}
 	}
@@ -85,7 +93,7 @@ func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1alpha1.DoRespon
 	return nil
 }
 
-func syncCommandWithResult(cmd0 flowstate.Command, res *commandv1.AnyResult, stateCtxs []*flowstate.StateCtx) error {
+func syncCommandWithResult(cmd0 flowstate.Command, res *commandv1.AnyResult, stateCtxs []*flowstate.StateCtx, datas []*flowstate.Data) error {
 	switch cmd := cmd0.(type) {
 	case *flowstate.TransitCommand:
 		if res.GetTransit() == nil {
@@ -222,10 +230,74 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *commandv1.AnyResult, sta
 		}
 
 		for i, subCmd := range cmd.Commands {
-			if err := syncCommandWithResult(subCmd, apiRes.Results[i], stateCtxs); err != nil {
+			if err := syncCommandWithResult(subCmd, apiRes.Results[i], stateCtxs, datas); err != nil {
 				return err
 			}
 		}
+		return nil
+	case *flowstate.StoreDataCommand:
+		if res.GetStoreData() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
+		}
+		apiRes := res.GetStoreData()
+		d, err := convertorv1.FindDataByRef(apiRes.DataRef, datas)
+		if err != nil {
+			return err
+		}
+		d.CopyTo(cmd.Data)
+		return nil
+	case *flowstate.GetDataCommand:
+		if res.GetGetData() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
+		}
+
+		apiRes := res.GetGetData()
+		d, err := convertorv1.FindDataByRef(apiRes.DataRef, datas)
+		if err != nil {
+			return err
+		}
+		d.CopyTo(cmd.Data)
+
+		return nil
+	case *flowstate.ReferenceDataCommand:
+		if res.GetReferenceData() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
+		}
+
+		apiRes := res.GetReferenceData()
+
+		d, err := convertorv1.FindDataByRef(apiRes.DataRef, datas)
+		if err != nil {
+			return err
+		}
+		d.CopyTo(cmd.Data)
+
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+		stateCtx.CopyTo(cmd.StateCtx)
+
+		return nil
+	case *flowstate.DereferenceDataCommand:
+		if res.GetDereferenceData() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
+		}
+
+		apiRes := res.GetDereferenceData()
+
+		d, err := convertorv1.FindDataByRef(apiRes.DataRef, datas)
+		if err != nil {
+			return err
+		}
+		d.CopyTo(cmd.Data)
+
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+
+		stateCtx.CopyTo(cmd.StateCtx)
 		return nil
 	default:
 		return fmt.Errorf("unknown command %T", cmd0)

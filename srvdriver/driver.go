@@ -44,6 +44,8 @@ func New(serverHttpHost string) *Driver {
 		stddoer.Noop(),
 		stddoer.NewSerializer(),
 		stddoer.NewDeserializer(),
+		flowstate.DefaultDereferenceDataDoer,
+		flowstate.DefaultReferenceDataDoer,
 
 		newFlowGetter(d.FlowRegistry),
 		newWatcher(d.ec),
