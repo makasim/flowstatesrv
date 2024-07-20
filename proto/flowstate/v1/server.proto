@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package flowstate.v1;
+
+import "flowstate/v1/state.proto";
+import "flowstate/v1/commands.proto";
+
+message ErrorConflict {
+  repeated string committable_state_ids = 2;
+}
+
+message DoCommandRequest {
+  repeated StateContext state_contexts = 1;
+  repeated Data data = 2;
+  repeated AnyCommand commands = 3;
+}
+
+message DoCommandResponse {
+  repeated StateContext state_contexts = 1;
+  repeated Data data = 2;
+  repeated AnyResult results = 3;
+}
+
+message WatchStatesRequest {
+  int64 since_rev = 1;
+  bool since_latest = 2;
+  map<string, string> labels = 3;
+}
+
+message WatchStatesResponse {
+  State state = 1;
+}
+
+message RegisterFlowRequest {
+  string flow_id = 1;
+  string http_host = 2;
+}
+
+message RegisterFlowResponse {
+}
+
+service ServerService {
+  rpc DoCommand(DoCommandRequest) returns (DoCommandResponse) {}
+  rpc WatchStates(WatchStatesRequest) returns (stream WatchStatesResponse) {}
+  rpc RegisterFlow(RegisterFlowRequest) returns (RegisterFlowResponse) {}
+}

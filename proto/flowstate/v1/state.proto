@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package flowstate.state.v1;
+package flowstate.v1;
 
 message Data {
   string id = 1;

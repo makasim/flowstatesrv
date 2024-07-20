@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package flowstate.command.v1;
+package flowstate.v1;
 
-import "flowstate/state/v1/state.proto";
+import "flowstate/v1/state.proto";
 
 message AnyCommand {
   oneof command {
@@ -43,12 +43,12 @@ message AnyResult {
 }
 
 message Transit {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
   string flow_id = 2;
 }
 
 message TransitResult {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message Pause {
@@ -56,36 +56,36 @@ message Pause {
     string flow_id = 1;
   }
 
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
   WithTransit with_transit = 2;
 }
 
 message PauseResult {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message Resume {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message ResumeResult {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message End {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message EndResult {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message Execute {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message ExecuteResult {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message Delay {
@@ -93,13 +93,13 @@ message Delay {
     bool commit = 1;
   }
 
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
   string duration = 2;
   WithCommit with_commit = 3;
 }
 
 message DelayResult {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
   string duration = 2;
   bool commit = 3;
 }
@@ -113,73 +113,73 @@ message CommitResult {
 }
 
 message Noop {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message NoopResult {
-  flowstate.state.v1.StateRef state_ref = 1;
+  StateRef state_ref = 1;
 }
 
 message Serialize {
-  flowstate.state.v1.StateRef serializable_state_ref = 1;
-  flowstate.state.v1.StateRef state_ref = 2;
+  StateRef serializable_state_ref = 1;
+  StateRef state_ref = 2;
   string annotation = 3;
 }
 
 message SerializeResult {
-  flowstate.state.v1.StateRef serializable_state_ref = 1;
-  flowstate.state.v1.StateRef state_ref = 2;
+  StateRef serializable_state_ref = 1;
+  StateRef state_ref = 2;
   string annotation = 3;
 }
 
 message Deserialize {
-  flowstate.state.v1.StateRef deserialized_state_ref = 1;
-  flowstate.state.v1.StateRef state_ref = 2;
+  StateRef deserialized_state_ref = 1;
+  StateRef state_ref = 2;
   string annotation = 3;
 }
 
 message DeserializeResult {
-  flowstate.state.v1.StateRef deserialized_state_ref = 1;
-  flowstate.state.v1.StateRef state_ref = 2;
+  StateRef deserialized_state_ref = 1;
+  StateRef state_ref = 2;
   string annotation = 3;
 }
 
 message ReferenceData {
-  flowstate.state.v1.StateRef state_ref = 1;
-  flowstate.state.v1.DataRef data_ref = 2;
+  StateRef state_ref = 1;
+  DataRef data_ref = 2;
   string annotation = 3;
 }
 
 message DereferenceDataResult {
-  flowstate.state.v1.StateRef state_ref = 1;
-  flowstate.state.v1.DataRef data_ref = 2;
+  StateRef state_ref = 1;
+  DataRef data_ref = 2;
   string annotation = 3;
 }
 
 message DereferenceData {
-  flowstate.state.v1.StateRef state_ref = 1;
-  flowstate.state.v1.DataRef data_ref = 2;
+  StateRef state_ref = 1;
+  DataRef data_ref = 2;
   string annotation = 3;
 }
 
 message ReferenceDataResult {
-  flowstate.state.v1.StateRef state_ref = 1;
-  flowstate.state.v1.DataRef data_ref = 2;
+  StateRef state_ref = 1;
+  DataRef data_ref = 2;
   string annotation = 3;
 }
 
 message GetData {
-  flowstate.state.v1.DataRef data_ref = 1;
+  DataRef data_ref = 1;
 }
 
 message GetDataResult {
-  flowstate.state.v1.DataRef data_ref = 1;
+  DataRef data_ref = 1;
 }
 
 message StoreData {
-  flowstate.state.v1.DataRef data_ref = 1;
+  DataRef data_ref = 1;
 }
 
 message StoreDataResult {
-  flowstate.state.v1.DataRef data_ref = 1;
+  DataRef data_ref = 1;
 }

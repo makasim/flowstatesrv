@@ -6,18 +6,18 @@ import (
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
-	flowv1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1/flowv1alpha1connect"
+	clientv1 "github.com/makasim/flowstatesrv/protogen/flowstate/client/v1"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/client/v1/clientv1connect"
 )
 
 type Config struct {
 }
 
 type Flow struct {
-	fc flowv1alpha1connect.FlowServiceClient
+	fc clientv1connect.ClientServiceClient
 }
 
-func New(fc flowv1alpha1connect.FlowServiceClient) *Flow {
+func New(fc clientv1connect.ClientServiceClient) *Flow {
 	return &Flow{
 		fc: fc,
 	}
@@ -26,7 +26,7 @@ func New(fc flowv1alpha1connect.FlowServiceClient) *Flow {
 func (f *Flow) Execute(stateCtx *flowstate.StateCtx, _ *flowstate.Engine) (flowstate.Command, error) {
 	apiStateCtx := convertorv1.ConvertStateCtxToAPI(stateCtx)
 
-	resp, err := f.fc.Execute(context.Background(), connect.NewRequest(&flowv1alpha1.ExecuteRequest{
+	resp, err := f.fc.Execute(context.Background(), connect.NewRequest(&clientv1.ExecuteRequest{
 		StateContext: apiStateCtx,
 	}))
 	if err != nil {

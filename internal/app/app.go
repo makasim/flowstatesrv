@@ -10,9 +10,8 @@ import (
 
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/memdriver"
-	"github.com/makasim/flowstatesrv/internal/api/enginehandlerv1alpha1"
-	"github.com/makasim/flowstatesrv/internal/api/flowhandlerv1alpha1"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
+	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -39,8 +38,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	mux := http.NewServeMux()
 
-	mux.Handle(flowstatev1alpha1connect.NewFlowServiceHandler(flowhandlerv1alpha1.New(d)))
-	mux.Handle(flowstatev1alpha1connect.NewEngineServiceHandler(enginehandlerv1alpha1.New(e)))
+	mux.Handle(flowstatev1connect.NewServerServiceHandler(serverservicev1.New(e, d)))
 
 	srv := &http.Server{
 		Addr:    `127.0.0.1:8080`,

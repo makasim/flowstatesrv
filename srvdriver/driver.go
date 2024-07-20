@@ -11,9 +11,9 @@ import (
 	"github.com/bufbuild/httplb"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/stddoer"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/flow/v1alpha1/flowv1alpha1connect"
-	v1alpha1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/v1alpha1/flowstatev1alpha1connect"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/client/v1/clientv1connect"
+	flowstatev1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 )
 
 type Driver struct {
@@ -21,8 +21,7 @@ type Driver struct {
 	hs    *http.Server
 	hc    *httplb.Client
 	doers []flowstate.Doer
-	ec    flowstatev1alpha1connect.EngineServiceClient
-	fc    flowstatev1alpha1connect.FlowServiceClient
+	sc    flowstatev1connect.ServerServiceClient
 }
 
 func New(serverHttpHost string) *Driver {
@@ -32,8 +31,7 @@ func New(serverHttpHost string) *Driver {
 		FlowRegistry: &FlowRegistry{},
 
 		hc: hc,
-		ec: flowstatev1alpha1connect.NewEngineServiceClient(hc, serverHttpHost, connect.WithProtoJSON()),
-		fc: flowstatev1alpha1connect.NewFlowServiceClient(hc, serverHttpHost, connect.WithProtoJSON()),
+		sc: flowstatev1connect.NewServerServiceClient(hc, serverHttpHost, connect.WithProtoJSON()),
 	}
 
 	doers := []flowstate.Doer{
@@ -48,8 +46,8 @@ func New(serverHttpHost string) *Driver {
 		flowstate.DefaultReferenceDataDoer,
 
 		newFlowGetter(d.FlowRegistry),
-		newWatcher(d.ec),
-		newRemoteDoer(d.ec),
+		newWatcher(d.sc),
+		newRemoteDoer(d.sc),
 	}
 	d.doers = doers
 
@@ -72,7 +70,7 @@ func (d *Driver) Do(cmd0 flowstate.Command) error {
 
 func (d *Driver) Init(e *flowstate.Engine) error {
 	mux := http.NewServeMux()
-	mux.Handle(flowv1alpha1connect.NewFlowServiceHandler(newHandler(e)))
+	mux.Handle(clientv1connect.NewClientServiceHandler(newHandler(e)))
 
 	d.hs = &http.Server{
 		Addr:    `:23654`,
@@ -86,7 +84,7 @@ func (d *Driver) Init(e *flowstate.Engine) error {
 	}()
 
 	for fID := range d.FlowRegistry.flows {
-		if _, err := d.fc.Register(context.Background(), connect.NewRequest(&v1alpha1.RegisterRequest{
+		if _, err := d.sc.RegisterFlow(context.Background(), connect.NewRequest(&flowstatev1.RegisterFlowRequest{
 			FlowId:   string(fID),
 			HttpHost: `http://127.0.0.1:23654`,
 		})); err != nil {
