@@ -99,8 +99,8 @@ func (s *Service) WatchStates(ctx context.Context, req *connect.Request[v1.Watch
 	if req.Msg.SinceLatest {
 		wCmd.WithSinceLatest()
 	}
-	if req.Msg.SinceTimeMsec > 0 {
-		wCmd.WithSinceTime(time.UnixMilli(req.Msg.SinceTimeMsec))
+	if req.Msg.SinceTimeUsec > 0 {
+		wCmd.WithSinceTime(time.UnixMicro(req.Msg.GetSinceTimeUsec()))
 	}
 
 	w, err := flowstate.DoWatch(s.e, wCmd)
@@ -108,6 +108,12 @@ func (s *Service) WatchStates(ctx context.Context, req *connect.Request[v1.Watch
 		return connect.NewError(connect.CodeInternal, err)
 	}
 	defer w.Close()
+
+	if err := stream.Send(&v1.WatchStatesResponse{
+		Ping: true,
+	}); err != nil {
+		return connect.NewError(connect.CodeInternal, err)
+	}
 
 	for {
 		select {

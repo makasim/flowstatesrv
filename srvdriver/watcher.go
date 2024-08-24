@@ -87,9 +87,9 @@ func (lis *listener) listen() {
 
 	wCtx, wCtxCancel := context.WithCancel(context.Background())
 
-	var sinceTimeMSec int64
+	var sinceTimeUsec int64
 	if !lis.sinceTime.IsZero() {
-		sinceTimeMSec = lis.sinceTime.UnixMilli()
+		sinceTimeUsec = lis.sinceTime.UnixMicro()
 	}
 
 	apiLabels := make([]*v1.WatchStatesRequest_Labels, 0, len(lis.labels))
@@ -102,11 +102,10 @@ func (lis *listener) listen() {
 		}
 	}
 
-	log.Println(lis.sinceTime.Unix())
 	srvS, err := lis.ec.WatchStates(wCtx, connect.NewRequest(&v1.WatchStatesRequest{
 		SinceRev:      lis.sinceRev,
 		SinceLatest:   lis.sinceLatest,
-		SinceTimeMsec: sinceTimeMSec,
+		SinceTimeUsec: sinceTimeUsec,
 		Labels:        apiLabels,
 	}))
 	if err != nil {
@@ -122,6 +121,12 @@ func (lis *listener) listen() {
 	}()
 
 	for srvS.Receive() {
+		// I cannot gracefully close stream from client side when no events have been received.
+		// Ping puts stream in a state where it can be closed gracefully.
+		if srvS.Msg().Ping {
+			continue
+		}
+
 		state := convertorv1.ConvertAPIToState(srvS.Msg().State)
 		select {
 		case lis.watchCh <- state:

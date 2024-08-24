@@ -28,12 +28,13 @@ message WatchStatesRequest {
 
   int64 since_rev = 1;
   bool since_latest = 2;
-  int64 since_time_msec = 3;
+  int64 since_time_usec = 3;
   repeated Labels labels = 4;
 }
 
 message WatchStatesResponse {
   State state = 1;
+  bool ping = 2;
 }
 
 message RegisterFlowRequest {
