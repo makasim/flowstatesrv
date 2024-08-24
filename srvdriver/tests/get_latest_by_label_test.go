@@ -7,10 +7,10 @@ import (
 	"github.com/makasim/flowstatesrv/srvdriver"
 )
 
-func TestWatch(t *testing.T) {
+func TestGetLatestByLabel(t *testing.T) {
 	defer startSrv(t)()
 
-	d := srvdriver.New(`h2c://127.0.0.1:8080`)
+	d := srvdriver.New(`http://127.0.0.1:8080`)
 
-	testcases.Watch(t, d, d)
+	testcases.GetLatestByLabel(t, d, d)
 }

@@ -38,11 +38,15 @@ func (d *RemoteDoer) Do(cmd0 flowstate.Command) error {
 		return d.do(cmd0)
 	case *flowstate.DelayCommand:
 		return d.do(cmd0)
-	case *flowstate.GetWatcherCommand:
+	case *flowstate.WatchCommand:
 		return d.do(cmd0)
 	case *flowstate.StoreDataCommand:
 		return d.do(cmd0)
 	case *flowstate.GetDataCommand:
+		return d.do(cmd0)
+	case *flowstate.GetCommand:
+		return d.do(cmd0)
+	case *flowstate.CommitStateCtxCommand:
 		return d.do(cmd0)
 	default:
 		return flowstate.ErrCommandNotSupported
@@ -290,6 +294,34 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 			return err
 		}
 		d.CopyTo(cmd.Data)
+
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+
+		stateCtx.CopyTo(cmd.StateCtx)
+		return nil
+	case *flowstate.GetCommand:
+		if res.GetGet() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
+		}
+
+		apiRes := res.GetGet()
+
+		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
+		if err != nil {
+			return err
+		}
+
+		stateCtx.CopyTo(cmd.StateCtx)
+		return nil
+	case *flowstate.CommitStateCtxCommand:
+		if res.GetCommitState() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
+		}
+
+		apiRes := res.GetCommitState()
 
 		stateCtx, err := convertorv1.FindStateCtxByRef(apiRes.StateRef, stateCtxs)
 		if err != nil {

@@ -30,7 +30,9 @@ func startSrv(t *testing.T) func() {
 		if err := app.New(cfg).Run(ctx); err != nil {
 			runResCh <- err
 			log.Printf("ERROR: flowstatesrv: app: run: %v", err)
+			return
 		}
+		runResCh <- nil
 	}()
 
 	timeoutT := time.NewTimer(time.Second)
@@ -50,7 +52,18 @@ loop:
 		}
 	}
 
-	return cancelCtx
+	return func() {
+		cancelCtx()
+		select {
+		case err := <-runResCh:
+			if err != nil {
+				t.Fatalf("app shutdown error: %v", err)
+			}
+			return
+		case <-time.After(time.Second):
+			t.Fatalf("app shutdown timeout")
+		}
+	}
 }
 
 func tcpReady(addr string) error {

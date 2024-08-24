@@ -20,6 +20,8 @@ message AnyCommand {
     GetData get_data = 12;
     ReferenceData reference_data = 13;
     DereferenceData dereference_data = 14;
+    Get get = 15;
+    CommitState commit_state = 16;
   }
 }
 
@@ -39,6 +41,8 @@ message AnyResult {
     GetDataResult get_data = 12;
     ReferenceDataResult reference_data = 13;
     DereferenceDataResult dereference_data = 14;
+    GetResult get = 15;
+    CommitStateResult commit_state = 16;
   }
 }
 
@@ -52,12 +56,8 @@ message TransitResult {
 }
 
 message Pause {
-  message WithTransit {
-    string flow_id = 1;
-  }
-
   StateRef state_ref = 1;
-  WithTransit with_transit = 2;
+  string flow_id = 2;
 }
 
 message PauseResult {
@@ -89,13 +89,9 @@ message ExecuteResult {
 }
 
 message Delay {
-  message WithCommit {
-    bool commit = 1;
-  }
-
   StateRef state_ref = 1;
   string duration = 2;
-  WithCommit with_commit = 3;
+  bool commit = 3;
 }
 
 message DelayResult {
@@ -110,6 +106,14 @@ message Commit {
 
 message CommitResult {
   repeated AnyResult results = 3;
+}
+
+message CommitState {
+  StateRef state_ref = 1;
+}
+
+message CommitStateResult {
+  StateRef state_ref = 1;
 }
 
 message Noop {
@@ -182,4 +186,17 @@ message StoreData {
 
 message StoreDataResult {
   DataRef data_ref = 1;
+}
+
+
+message Get {
+  string id = 1;
+  int64 rev = 2;
+  map<string, string> labels = 3;
+
+  StateRef state_ref = 4;
+}
+
+message GetResult {
+  StateRef state_ref = 4;
 }
