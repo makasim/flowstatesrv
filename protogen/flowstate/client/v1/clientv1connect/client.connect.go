@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// ClientServiceName is the fully-qualified name of the ClientService service.
@@ -35,6 +35,12 @@ const (
 const (
 	// ClientServiceExecuteProcedure is the fully-qualified name of the ClientService's Execute RPC.
 	ClientServiceExecuteProcedure = "/flowstate.client.v1.ClientService/Execute"
+)
+
+// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
+var (
+	clientServiceServiceDescriptor       = v1.File_flowstate_client_v1_client_proto.Services().ByName("ClientService")
+	clientServiceExecuteMethodDescriptor = clientServiceServiceDescriptor.Methods().ByName("Execute")
 )
 
 // ClientServiceClient is a client for the flowstate.client.v1.ClientService service.
@@ -55,7 +61,8 @@ func NewClientServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 		execute: connect.NewClient[v1.ExecuteRequest, v1.ExecuteResponse](
 			httpClient,
 			baseURL+ClientServiceExecuteProcedure,
-			opts...,
+			connect.WithSchema(clientServiceExecuteMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
@@ -84,7 +91,8 @@ func NewClientServiceHandler(svc ClientServiceHandler, opts ...connect.HandlerOp
 	clientServiceExecuteHandler := connect.NewUnaryHandler(
 		ClientServiceExecuteProcedure,
 		svc.Execute,
-		opts...,
+		connect.WithSchema(clientServiceExecuteMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/flowstate.client.v1.ClientService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {

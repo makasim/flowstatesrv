@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// ServerServiceName is the fully-qualified name of the ServerService service.
@@ -43,6 +43,14 @@ const (
 	ServerServiceRegisterFlowProcedure = "/flowstate.v1.ServerService/RegisterFlow"
 )
 
+// These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
+var (
+	serverServiceServiceDescriptor            = v1.File_flowstate_v1_server_proto.Services().ByName("ServerService")
+	serverServiceDoCommandMethodDescriptor    = serverServiceServiceDescriptor.Methods().ByName("DoCommand")
+	serverServiceWatchStatesMethodDescriptor  = serverServiceServiceDescriptor.Methods().ByName("WatchStates")
+	serverServiceRegisterFlowMethodDescriptor = serverServiceServiceDescriptor.Methods().ByName("RegisterFlow")
+)
+
 // ServerServiceClient is a client for the flowstate.v1.ServerService service.
 type ServerServiceClient interface {
 	DoCommand(context.Context, *connect.Request[v1.DoCommandRequest]) (*connect.Response[v1.DoCommandResponse], error)
@@ -63,17 +71,20 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 		doCommand: connect.NewClient[v1.DoCommandRequest, v1.DoCommandResponse](
 			httpClient,
 			baseURL+ServerServiceDoCommandProcedure,
-			opts...,
+			connect.WithSchema(serverServiceDoCommandMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		watchStates: connect.NewClient[v1.WatchStatesRequest, v1.WatchStatesResponse](
 			httpClient,
 			baseURL+ServerServiceWatchStatesProcedure,
-			opts...,
+			connect.WithSchema(serverServiceWatchStatesMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 		registerFlow: connect.NewClient[v1.RegisterFlowRequest, v1.RegisterFlowResponse](
 			httpClient,
 			baseURL+ServerServiceRegisterFlowProcedure,
-			opts...,
+			connect.WithSchema(serverServiceRegisterFlowMethodDescriptor),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
@@ -116,17 +127,20 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 	serverServiceDoCommandHandler := connect.NewUnaryHandler(
 		ServerServiceDoCommandProcedure,
 		svc.DoCommand,
-		opts...,
+		connect.WithSchema(serverServiceDoCommandMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	serverServiceWatchStatesHandler := connect.NewServerStreamHandler(
 		ServerServiceWatchStatesProcedure,
 		svc.WatchStates,
-		opts...,
+		connect.WithSchema(serverServiceWatchStatesMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	serverServiceRegisterFlowHandler := connect.NewUnaryHandler(
 		ServerServiceRegisterFlowProcedure,
 		svc.RegisterFlow,
-		opts...,
+		connect.WithSchema(serverServiceRegisterFlowMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/flowstate.v1.ServerService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {

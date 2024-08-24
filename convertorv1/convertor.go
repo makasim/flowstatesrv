@@ -50,8 +50,8 @@ func APICommandToCommand(apiAnyCmd *flowstatev1.AnyCommand, stateCtxs []*flowsta
 
 		cmd := flowstate.Pause(stateCtx)
 
-		if apiCmd.WithTransit != nil {
-			cmd = cmd.WithTransit(flowstate.FlowID(apiCmd.WithTransit.FlowId))
+		if apiCmd.FlowId != `` {
+			cmd = cmd.WithTransit(flowstate.FlowID(apiCmd.FlowId))
 		}
 
 		return cmd, nil
@@ -97,8 +97,8 @@ func APICommandToCommand(apiAnyCmd *flowstatev1.AnyCommand, stateCtxs []*flowsta
 
 		cmd := flowstate.Delay(stateCtx, dur)
 
-		if apiCmd.WithCommit != nil {
-			cmd.Commit = apiCmd.WithCommit.Commit
+		if apiCmd.Commit {
+			cmd.WithCommit(true)
 		}
 
 		return cmd, nil
@@ -187,6 +187,28 @@ func APICommandToCommand(apiAnyCmd *flowstatev1.AnyCommand, stateCtxs []*flowsta
 		}
 
 		return flowstate.DereferenceData(stateCtx, d, apiCmd.Annotation), nil
+	case apiAnyCmd.GetGet() != nil:
+		apiCmd := apiAnyCmd.GetGet()
+
+		stateCtx, err := FindStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		if apiCmd.Id != "" {
+			return flowstate.GetByID(stateCtx, flowstate.StateID(apiCmd.Id), apiCmd.Rev), nil
+		}
+
+		return flowstate.GetByLabels(stateCtx, copyMap(apiCmd.Labels)), nil
+	case apiAnyCmd.GetCommitState() != nil:
+		apiCmd := apiAnyCmd.GetCommitState()
+
+		stateCtx, err := FindStateCtxByRef(apiCmd.StateRef, stateCtxs)
+		if err != nil {
+			return nil, err
+		}
+
+		return flowstate.CommitStateCtx(stateCtx), nil
 	default:
 		return nil, fmt.Errorf("unknown command %T", apiAnyCmd.Command)
 	}
@@ -272,9 +294,7 @@ func CommandToAPICommand(cmd flowstate.Command) (*flowstatev1.AnyCommand, error)
 		}
 
 		if cmd1.FlowID != "" {
-			apiCmd.GetPause().WithTransit = &flowstatev1.Pause_WithTransit{
-				FlowId: string(cmd1.FlowID),
-			}
+			apiCmd.GetPause().FlowId = string(cmd1.FlowID)
 		}
 
 		return apiCmd, nil
@@ -313,9 +333,7 @@ func CommandToAPICommand(cmd flowstate.Command) (*flowstatev1.AnyCommand, error)
 		}
 
 		if cmd1.Commit {
-			apiCmd.GetDelay().WithCommit = &flowstatev1.Delay_WithCommit{
-				Commit: true,
-			}
+			apiCmd.GetDelay().Commit = true
 		}
 
 		return apiCmd, nil
@@ -398,6 +416,25 @@ func CommandToAPICommand(cmd flowstate.Command) (*flowstatev1.AnyCommand, error)
 					StateRef:   ConvertStateCtxToRefAPI(cmd1.StateCtx),
 					DataRef:    ConvertDataToRefAPI(cmd1.Data),
 					Annotation: cmd1.Annotation,
+				},
+			},
+		}, nil
+	case *flowstate.GetCommand:
+		return &flowstatev1.AnyCommand{
+			Command: &flowstatev1.AnyCommand_Get{
+				Get: &flowstatev1.Get{
+					Id:       string(cmd1.ID),
+					Rev:      cmd1.Rev,
+					Labels:   copyMap(cmd1.Labels),
+					StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+				},
+			},
+		}, nil
+	case *flowstate.CommitStateCtxCommand:
+		return &flowstatev1.AnyCommand{
+			Command: &flowstatev1.AnyCommand_CommitState{
+				CommitState: &flowstatev1.CommitState{
+					StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
 				},
 			},
 		}, nil
@@ -540,6 +577,22 @@ func CommandToAPIResult(cmd flowstate.Command) (*flowstatev1.AnyResult, error) {
 				},
 			},
 		}, nil
+	case *flowstate.GetCommand:
+		return &flowstatev1.AnyResult{
+			Result: &flowstatev1.AnyResult_Get{
+				Get: &flowstatev1.GetResult{
+					StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+				},
+			},
+		}, nil
+	case *flowstate.CommitStateCtxCommand:
+		return &flowstatev1.AnyResult{
+			Result: &flowstatev1.AnyResult_CommitState{
+				CommitState: &flowstatev1.CommitStateResult{
+					StateRef: ConvertStateCtxToRefAPI(cmd1.StateCtx),
+				},
+			},
+		}, nil
 	default:
 		return nil, fmt.Errorf("unknown command type %T", cmd)
 	}
@@ -588,6 +641,10 @@ func ConvertCommandToStateContexts(cmd flowstate.Command) []*flowstatev1.StateCo
 	case *flowstate.ReferenceDataCommand:
 		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
 	case *flowstate.DereferenceDataCommand:
+		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
+	case *flowstate.GetCommand:
+		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
+	case *flowstate.CommitStateCtxCommand:
 		apiStateCtxs = append(apiStateCtxs, ConvertStateCtxToAPI(cmd1.StateCtx))
 	default:
 		return nil
