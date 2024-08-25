@@ -1,0 +1,29 @@
+version: '3'
+
+tasks:
+  genproto:
+    cmds:
+      - buf lint
+      - rm -rf protogen/*
+      - buf generate
+
+  build:
+    cmds:
+      - |
+        go mod tidy && go mod vendor
+        GOOS=linux GOARCH=amd64 go build -o flowstatesrv main/main.go
+      - |
+        COMMIT=$(git rev-list -1 HEAD | cut -c1-8)
+        echo "Building flowstatesrv:$COMMIT"
+        docker build --platform="linux/amd64" -t "flowstatesrv:$COMMIT" .
+
+  push:
+    cmds:
+      - |
+        COMMIT=$(git rev-list -1 HEAD | cut -c1-8)
+        docker tag "flowstatesrv:$COMMIT" "registry.makasim.com/flowstatesrv:$COMMIT"
+        docker tag "flowstatesrv:$COMMIT" "registry.makasim.com/flowstatesrv:latest"
+        echo "Pushing registry.makasim.com/flowstatesrv:$COMMIT"
+        docker push "registry.makasim.com/flowstatesrv:$COMMIT"
+        echo "Pushing registry.makasim.com/flowstatesrv:latest"
+        docker push "registry.makasim.com/flowstatesrv:latest"
