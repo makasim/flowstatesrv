@@ -1,4 +1,4 @@
-package tests
+package srvdriver_test
 
 import (
 	"context"
@@ -7,17 +7,23 @@ import (
 	"testing"
 	"time"
 
+	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/testcases"
 	"github.com/makasim/flowstatesrv/internal/app"
 	"github.com/makasim/flowstatesrv/srvdriver"
 )
 
-func TestSingleNode(t *testing.T) {
-	defer startSrv(t)()
+func TestSuite(t *testing.T) {
+	s := testcases.Get(func(t testcases.TestingT) (flowstate.Doer, testcases.FlowRegistry) {
+		t1 := t.(*testing.T)
+		t1.Cleanup(startSrv(t1))
 
-	d := srvdriver.New(`http://127.0.0.1:8080`)
+		d := srvdriver.New(`http://127.0.0.1:8080`)
 
-	testcases.SingleNode(t, d, d)
+		return d, d
+	})
+
+	s.Test(t)
 }
 
 func startSrv(t *testing.T) func() {
