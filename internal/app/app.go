@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/makasim/flowstate"
@@ -36,12 +37,17 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("new engine: %w", err)
 	}
 
+	addr := `127.0.0.1:8080`
+	if os.Getenv(`FLOWSTATESRV_ADDR`) != `` {
+		addr = os.Getenv(`FLOWSTATESRV_ADDR`)
+	}
+
 	mux := http.NewServeMux()
 
 	mux.Handle(flowstatev1connect.NewServerServiceHandler(serverservicev1.New(e, d)))
 
 	srv := &http.Server{
-		Addr:    `127.0.0.1:8080`,
+		Addr:    addr,
 		Handler: h2c.NewHandler(mux, &http2.Server{}),
 	}
 
