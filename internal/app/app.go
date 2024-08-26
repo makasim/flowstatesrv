@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstate/memdriver"
 	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
+	"github.com/makasim/flowstatesrv/internal/driver"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -31,7 +31,7 @@ func New(cfg Config) *App {
 }
 
 func (a *App) Run(ctx context.Context) error {
-	d := memdriver.New()
+	d := driver.New()
 	e, err := flowstate.NewEngine(d)
 	if err != nil {
 		return fmt.Errorf("new engine: %w", err)
