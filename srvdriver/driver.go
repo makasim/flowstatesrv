@@ -10,7 +10,6 @@ import (
 	"connectrpc.com/connect"
 	"github.com/bufbuild/httplb"
 	"github.com/makasim/flowstate"
-	"github.com/makasim/flowstate/stddoer"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/client/v1/clientv1connect"
 	flowstatev1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
@@ -35,13 +34,15 @@ func New(serverHttpHost string) *Driver {
 	}
 
 	doers := []flowstate.Doer{
-		stddoer.Transit(),
-		stddoer.Pause(),
-		stddoer.Resume(),
-		stddoer.End(),
-		stddoer.Noop(),
-		stddoer.NewSerializer(),
-		stddoer.NewDeserializer(),
+		flowstate.DefaultTransitDoer,
+		flowstate.DefaultPauseDoer,
+		flowstate.DefaultResumeDoer,
+		flowstate.DefaultEndDoer,
+		flowstate.DefaultNoopDoer,
+		flowstate.DefaultSerializerDoer,
+		flowstate.DefaultDeserializeDoer,
+		flowstate.DefaultDereferenceDataDoer,
+		flowstate.DefaultReferenceDataDoer,
 		flowstate.DefaultDereferenceDataDoer,
 		flowstate.DefaultReferenceDataDoer,
 

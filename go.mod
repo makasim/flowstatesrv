@@ -5,7 +5,7 @@ go 1.23
 require (
 	connectrpc.com/connect v1.16.2
 	github.com/bufbuild/httplb v0.3.0
-	github.com/makasim/flowstate v0.0.0-20240824175608-0599f6baa29d
+	github.com/makasim/flowstate v0.0.0-20240826112111-fb67b94e10d6
 	golang.org/x/net v0.28.0
 	google.golang.org/protobuf v1.34.2
 )
