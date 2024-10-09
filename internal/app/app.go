@@ -11,6 +11,7 @@ import (
 
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/memdriver"
+	"github.com/makasim/flowstatesrv/internal/api/corsmiddleware"
 	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 	"golang.org/x/net/http2"
@@ -42,9 +43,11 @@ func (a *App) Run(ctx context.Context) error {
 		addr = os.Getenv(`FLOWSTATESRV_ADDR`)
 	}
 
+	corsMW := corsmiddleware.New(os.Getenv(`CORS_ENABLED`) == `true`)
+
 	mux := http.NewServeMux()
 
-	mux.Handle(flowstatev1connect.NewServerServiceHandler(serverservicev1.New(e, d)))
+	mux.Handle(corsMW.WrapPath(flowstatev1connect.NewServerServiceHandler(serverservicev1.New(e, d))))
 
 	srv := &http.Server{
 		Addr:    addr,
