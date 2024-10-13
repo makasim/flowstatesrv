@@ -3,7 +3,8 @@ import { createConnectTransport } from "@connectrpc/connect-web";
 import { ServerService } from "./gen/flowstate/v1/server_connect";
 
 const transport = createConnectTransport({
-  baseUrl: import.meta.env.VITE_API_URL || "/",
+  // baseUrl: import.meta.env.VITE_API_URL || "/",
+  baseUrl: "https://flowstate.makasim.com",
 });
 
 export const client = createPromiseClient(ServerService, transport);
