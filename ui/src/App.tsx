@@ -1,59 +1,66 @@
+import { useState } from "react";
 import "./App.css";
-import { DataTable } from "./components/data-table";
-import { useEffect, useState } from "react";
-import { client } from "./api";
-import { State } from "./gen/flowstate/v1/state_pb";
-
-import { ColumnDef } from "@tanstack/react-table";
-
-export type StateData = {
-  id: string;
-  stateId: string;
-  rev: bigint;
-  transition: string;
-};
-
-export const columns: ColumnDef<StateData>[] = [
-  { accessorKey: "stateId", header: "ID" },
-  { accessorKey: "rev", header: "REV" },
-  { accessorKey: "transition", header: "Transtion" },
-];
+import { Button } from "./components/ui/button";
+import { Input } from "./components/ui/input";
+import { useLocalStorage } from "./hooks/useLocalStorage";
+import { StatesPage } from "./StatesPage";
 
 export default function App() {
-  const [states, setStates] = useState<State[]>([]);
+  const [apiURL, setApiURL] = useState("");
+  const [choosenServer, setChoosenServer] = useState("");
+  const [servers, setServers] = useLocalStorage<string[]>("servers", []);
 
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    listenToStates(abortController.signal).catch((error) =>
-      console.log("Listening error", error)
-    );
-
-    return () => abortController.abort();
-  }, []);
-
-  async function listenToStates(signal: AbortSignal) {
-    for await (const res of client.watchStates({}, { signal })) {
-      console.log(res);
-      if (res.ping) continue;
-      setStates((v) => (res.state ? [res.state, ...v] : v));
-    }
+  if (apiURL) {
+    return <StatesPage apiUrl={apiURL} />;
   }
-
-  function formatTransition({ from, to }: { from: string; to: string }) {
-    return from && from !== to ? `${from} -> ${to}` : to;
-  }
-
-  const data = states.map(({ id, rev, transition }) => ({
-    id: `${id}#${rev}`,
-    stateId: id,
-    rev,
-    transition: transition ? formatTransition(transition) : "",
-  }));
 
   return (
     <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={data} />
+      <form
+        className="flex w-full max-w-sm items-center space-x-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!servers.includes(choosenServer)) {
+            setServers([choosenServer, ...servers]);
+          }
+          setApiURL(choosenServer);
+        }}
+      >
+        <Input
+          placeholder="https://flowstate.makasim.com"
+          value={choosenServer}
+          onChange={(e) => setChoosenServer(e.target.value)}
+        />
+        <Button type="submit">Subscribe</Button>
+      </form>
+
+      <div className="mt-10">
+        <h1 className="text-2xl font-bold">Servers</h1>
+
+        <ul>
+          {servers.map((server) => (
+            <li
+              key={server}
+              className="flex w-full max-w-sm items-center space-x-2"
+            >
+              <Button
+                onClick={() => setServers(servers.filter((s) => s !== server))}
+              >
+                x
+              </Button>
+              <a
+                href={server}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setChoosenServer(server);
+                }}
+              >
+                {server}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

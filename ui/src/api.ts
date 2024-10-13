@@ -1,10 +1,9 @@
-import { createPromiseClient } from "@connectrpc/connect";
+import { createClient } from "@connectrpc/connect";
 import { createConnectTransport } from "@connectrpc/connect-web";
 import { ServerService } from "./gen/flowstate/v1/server_connect";
 
-const transport = createConnectTransport({
-  // baseUrl: import.meta.env.VITE_API_URL || "/",
-  baseUrl: "https://flowstate.makasim.com",
-});
+export function createApiClient(baseUrl: string) {
+  const transport = createConnectTransport({ baseUrl });
 
-export const client = createPromiseClient(ServerService, transport);
+  return createClient(ServerService, transport);
+}
