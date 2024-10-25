@@ -5,18 +5,47 @@ import { State } from "./gen/flowstate/v1/state_pb";
 
 import { ColumnDef } from "@tanstack/react-table";
 import { createApiClient } from "./api";
+import { Badge } from "./components/ui/badge";
 
-export type StateData = {
+type StateData = {
   id: string;
   stateId: string;
   rev: bigint;
   transition: string;
+  annotations: Record<string, string>;
+  labels: Record<string, string>;
 };
 
-export const columns: ColumnDef<StateData>[] = [
+const columns: ColumnDef<StateData>[] = [
   { accessorKey: "stateId", header: "ID" },
   { accessorKey: "rev", header: "REV" },
   { accessorKey: "transition", header: "Transtion" },
+  {
+    accessorKey: "annotations",
+    header: "Annotations",
+    cell: ({ row }) =>
+      Object.entries(row.original.annotations).map(([key, value]) => (
+        <div key={key} className="text-left">
+          <Badge variant="outline">
+            <span className="text-green-700">{key}:&nbsp;</span>
+            <span className="text-purple-700">{String(value)}</span>
+          </Badge>
+        </div>
+      )),
+  },
+  {
+    accessorKey: "labels",
+    header: "Labels",
+    cell: ({ row }) =>
+      Object.entries(row.original.labels).map(([key, value]) => (
+        <div key={key} className="text-left">
+          <Badge variant="outline">
+            <span className="text-green-700">{key}:&nbsp;</span>
+            <span className="text-purple-700">{String(value)}</span>
+          </Badge>
+        </div>
+      )),
+  },
 ];
 
 type Props = { apiUrl: string };
@@ -38,10 +67,7 @@ export const StatesPage: React.FC<Props> = ({ apiUrl }) => {
     return () => abortController.abort();
   }, [apiUrl]);
 
-  async function listenToStates(
-    client: ApiClient,
-    signal: AbortSignal
-  ) {
+  async function listenToStates(client: ApiClient, signal: AbortSignal) {
     for await (const res of client.watchStates({}, { signal })) {
       console.log(res);
       if (res.ping) continue;
@@ -53,12 +79,18 @@ export const StatesPage: React.FC<Props> = ({ apiUrl }) => {
     return from && from !== to ? `${from} -> ${to}` : to;
   }
 
-  const data = states.map(({ id, rev, transition }) => ({
-    id: `${id}#${rev}`,
-    stateId: id,
-    rev,
-    transition: transition ? formatTransition(transition) : "",
-  }));
+  const data = states.map((data) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { id, rev, transition, annotations, labels } = data.toJson() as any;
+    return {
+      id: `${id}#${rev}`,
+      stateId: id,
+      rev,
+      transition: transition ? formatTransition(transition) : "",
+      annotations,
+      labels,
+    };
+  });
 
   return (
     <div className="container mx-auto py-10">

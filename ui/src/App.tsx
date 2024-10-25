@@ -7,8 +7,8 @@ import { StatesPage } from "./StatesPage";
 
 export default function App() {
   const [apiURL, setApiURL] = useState("");
-  const [choosenServer, setChoosenServer] = useState("");
   const [servers, setServers] = useLocalStorage<string[]>("servers", []);
+  const [choosenServer, setChoosenServer] = useState(servers[0] || "");
 
   if (apiURL) {
     return <StatesPage apiUrl={apiURL} />;
