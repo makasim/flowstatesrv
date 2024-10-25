@@ -6,6 +6,13 @@ import { State } from "./gen/flowstate/v1/state_pb";
 import { ColumnDef } from "@tanstack/react-table";
 import { createApiClient } from "./api";
 import { Badge } from "./components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from "./components/ui/dialog";
 
 type StateData = {
   id: string;
@@ -14,6 +21,7 @@ type StateData = {
   transition: string;
   annotations: Record<string, string>;
   labels: Record<string, string>;
+  state: State;
 };
 
 const columns: ColumnDef<StateData>[] = [
@@ -45,6 +53,23 @@ const columns: ColumnDef<StateData>[] = [
           </Badge>
         </div>
       )),
+  },
+  {
+    accessorKey: "state",
+    header: "State",
+    cell: ({ row }) => (
+      <Dialog modal>
+        <DialogTrigger className="text-slate-100">Show State</DialogTrigger>
+        <DialogContent>
+          <DialogTitle>State: {row.original.state.id}</DialogTitle>
+          <DialogDescription>
+            <pre className="text-left">
+              {JSON.stringify(row.original.state.toJson(), null, 2)}
+            </pre>
+          </DialogDescription>
+        </DialogContent>
+      </Dialog>
+    ),
   },
 ];
 
@@ -79,9 +104,9 @@ export const StatesPage: React.FC<Props> = ({ apiUrl }) => {
     return from && from !== to ? `${from} -> ${to}` : to;
   }
 
-  const data = states.map((data) => {
+  const data = states.map((state) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { id, rev, transition, annotations, labels } = data.toJson() as any;
+    const { id, rev, transition, annotations, labels } = state.toJson() as any;
     return {
       id: `${id}#${rev}`,
       stateId: id,
@@ -89,6 +114,7 @@ export const StatesPage: React.FC<Props> = ({ apiUrl }) => {
       transition: transition ? formatTransition(transition) : "",
       annotations,
       labels,
+      state,
     };
   });
 
