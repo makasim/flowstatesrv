@@ -1,17 +1,25 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import "./App.css";
 import { Button } from "./components/ui/button";
 import { Input } from "./components/ui/input";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { StatesPage } from "./StatesPage";
+import { ApiContext } from "./ApiContext";
+import { createApiClient } from "./api";
 
 export default function App() {
   const [apiURL, setApiURL] = useState("");
   const [servers, setServers] = useLocalStorage<string[]>("servers", []);
   const [choosenServer, setChoosenServer] = useState(servers[0] || "");
 
-  if (apiURL) {
-    return <StatesPage apiUrl={apiURL} />;
+  const client = useMemo(() => apiURL ? createApiClient(apiURL) : null, [apiURL]);
+
+  if (client) {
+    return (
+      <ApiContext.Provider value={client}>
+        <StatesPage />
+      </ApiContext.Provider>
+    );
   }
 
   return (

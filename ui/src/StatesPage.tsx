@@ -13,6 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "./components/ui/dialog";
+import { ApiContext } from "./ApiContext";
+import { AnnotationDetails } from "./AnnotationDetails";
 
 type StateData = {
   id: string;
@@ -40,6 +42,49 @@ const columns: ColumnDef<StateData>[] = [
           </Badge>
         </div>
       )),
+  },
+  {
+    accessorKey: "annotations",
+    header: "Data",
+    cell: ({ row }) =>
+      Object.values(row.original.annotations)
+        .filter((x) => x.startsWith("data:"))
+        .map((x) => x.slice(5).split(":"))
+        .map(([id, rev]) => (
+          <Dialog modal key={`${id}:${rev}`}>
+            <DialogTrigger className="text-slate">
+              <svg
+                className="w-6 h-6 text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-width="2"
+                  d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
+                />
+                <path
+                  stroke="currentColor"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                />
+              </svg>
+            </DialogTrigger>
+
+            <DialogContent>
+              <DialogTitle>
+                {id}:{rev}
+              </DialogTitle>
+              <DialogDescription>
+                <AnnotationDetails id={id} rev={rev} />
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
+        )),
   },
   {
     accessorKey: "labels",
@@ -73,16 +118,15 @@ const columns: ColumnDef<StateData>[] = [
   },
 ];
 
-type Props = { apiUrl: string };
 type ApiClient = ReturnType<typeof createApiClient>;
 
-export const StatesPage: React.FC<Props> = ({ apiUrl }) => {
+export const StatesPage = () => {
   const [states, setStates] = useState<State[]>([]);
+  const client = React.useContext(ApiContext);
 
   useEffect(() => {
-    if (!apiUrl) return;
+    if (!client) return;
 
-    const client = createApiClient(apiUrl);
     const abortController = new AbortController();
 
     listenToStates(client, abortController.signal).catch((error) =>
@@ -90,7 +134,7 @@ export const StatesPage: React.FC<Props> = ({ apiUrl }) => {
     );
 
     return () => abortController.abort();
-  }, [apiUrl]);
+  }, [client]);
 
   async function listenToStates(client: ApiClient, signal: AbortSignal) {
     for await (const res of client.watchStates({}, { signal })) {
