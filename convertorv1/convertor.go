@@ -748,7 +748,7 @@ func ConvertDataToAPI(data *flowstate.Data) *flowstatev1.Data {
 		Id:     string(data.ID),
 		Rev:    data.Rev,
 		Binary: data.Binary,
-		B:      string(data.B...),
+		B:      string(data.B),
 	}
 }
 
