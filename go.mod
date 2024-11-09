@@ -5,7 +5,7 @@ go 1.23
 require (
 	connectrpc.com/connect v1.16.2
 	github.com/bufbuild/httplb v0.3.0
-	github.com/makasim/flowstate v0.0.0-20240826112111-fb67b94e10d6
+	github.com/makasim/flowstate v0.0.0-20241103194112-ae3db69e3b4c
 	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.28.0
 	google.golang.org/protobuf v1.34.2
@@ -13,6 +13,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gorhill/cronexpr v0.0.0-20180427100037-88b0669f7d75 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
 	go.uber.org/goleak v1.3.0 // indirect
