@@ -736,17 +736,19 @@ func ConvertCommandToDatas(cmd flowstate.Command) []*flowstatev1.Data {
 
 func ConvertAPIToData(data *flowstatev1.Data) *flowstate.Data {
 	return &flowstate.Data{
-		ID:  flowstate.DataID(data.Id),
-		Rev: data.Rev,
-		B:   append([]byte(nil), data.B...),
+		ID:     flowstate.DataID(data.Id),
+		Rev:    data.Rev,
+		Binary: data.Binary,
+		B:      append([]byte(nil), data.B...),
 	}
 }
 
 func ConvertDataToAPI(data *flowstate.Data) *flowstatev1.Data {
 	return &flowstatev1.Data{
-		Id:  string(data.ID),
-		Rev: data.Rev,
-		B:   append([]byte(nil), data.B...),
+		Id:     string(data.ID),
+		Rev:    data.Rev,
+		Binary: data.Binary,
+		B:      string(data.B...),
 	}
 }
 

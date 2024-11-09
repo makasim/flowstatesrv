@@ -21,9 +21,14 @@ export class Data extends Message<Data> {
   rev = protoInt64.zero;
 
   /**
-   * @generated from field: bytes b = 3;
+   * @generated from field: bool binary = 3;
    */
-  b = new Uint8Array(0);
+  binary = false;
+
+  /**
+   * @generated from field: string b = 4;
+   */
+  b = "";
 
   constructor(data?: PartialMessage<Data>) {
     super();
@@ -35,7 +40,8 @@ export class Data extends Message<Data> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 3, name: "b", kind: "scalar", T: 12 /* ScalarType.BYTES */ },
+    { no: 3, name: "binary", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 4, name: "b", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Data {
