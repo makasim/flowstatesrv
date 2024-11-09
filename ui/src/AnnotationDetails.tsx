@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { ApiContext } from "./ApiContext";
+import { DoCommandResponse } from "./gen/flowstate/v1/server_pb";
 
 export const AnnotationDetails = ({ id, rev }: { id: string; rev: string }) => {
-  const [info, setInfo] = useState<object | null>(null);
+  const [info, setInfo] = useState<DoCommandResponse | null>(null);
   const client = useContext(ApiContext);
 
   useEffect(() => {
@@ -24,5 +25,21 @@ export const AnnotationDetails = ({ id, rev }: { id: string; rev: string }) => {
 
   if (!info) return "Loading...";
 
-  return <pre className="text-left">{JSON.stringify(info, null, 2)}</pre>;
+  return (
+    <>
+      {info.data.map((d) => {
+        if (d.binary) return <span>{d.b}</span>;
+
+        try {
+          return (
+            <pre className="text-left">
+              {JSON.stringify(JSON.parse(d.b), null, 2)}
+            </pre>
+          );
+        } catch {
+          return <span>{d.b}</span>;
+        }
+      })}
+    </>
+  );
 };

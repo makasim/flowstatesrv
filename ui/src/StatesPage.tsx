@@ -76,7 +76,7 @@ const columns: ColumnDef<StateData>[] = [
             </DialogTrigger>
 
             <DialogContent>
-              <DialogTitle>
+              <DialogTitle className="mb-4">
                 {id}:{rev}
               </DialogTitle>
               <DialogDescription>
