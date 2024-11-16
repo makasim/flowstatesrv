@@ -76,7 +76,7 @@ const columns: ColumnDef<StateData>[] = [
             </DialogTrigger>
 
             <DialogContent>
-              <DialogTitle className="mb-4">
+              <DialogTitle className="pb-4 sticky top-0 bg-background">
                 {id}:{rev}
               </DialogTitle>
               <DialogDescription>
