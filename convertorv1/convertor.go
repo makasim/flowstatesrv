@@ -200,6 +200,25 @@ func APICommandToCommand(apiAnyCmd *flowstatev1.AnyCommand, stateCtxs []*flowsta
 		}
 
 		return flowstate.GetByLabels(stateCtx, copyMap(apiCmd.Labels)), nil
+	case apiAnyCmd.GetGetMany() != nil:
+		apiCmd := apiAnyCmd.GetGetMany()
+
+		cmd := &flowstate.GetManyCommand{
+			SinceRev:   apiCmd.SinceRev,
+			SinceTime:  time.UnixMicro(apiCmd.SinceTimeUsec),
+			LatestOnly: apiCmd.LatestOnly,
+			Limit:      int(apiCmd.Limit),
+		}
+
+		for _, labels := range apiCmd.GetLabels() {
+			if len(labels.GetLabels()) == 0 {
+				continue
+			}
+
+			cmd.Labels = append(cmd.Labels, copyMap(labels.Labels))
+		}
+
+		return cmd, nil
 	case apiAnyCmd.GetCommitState() != nil:
 		apiCmd := apiAnyCmd.GetCommitState()
 
@@ -243,6 +262,14 @@ func ConvertAPIToState(apiS *flowstatev1.State) flowstate.State {
 		CommittedAtUnixMilli: apiS.CommittedAtUnixMilli,
 		Transition:           ConvertAPIToTransition(apiS.Transition),
 	}
+}
+
+func ConvertAPIToStates(apiS []*flowstatev1.State) []flowstate.State {
+	ss := make([]flowstate.State, 0, len(apiS))
+	for _, apiS := range apiS {
+		ss = append(ss, ConvertAPIToState(apiS))
+	}
+	return ss
 }
 
 func ConvertAPIToTransitions(apiTs []*flowstatev1.Transition) []flowstate.Transition {
@@ -430,6 +457,25 @@ func CommandToAPICommand(cmd flowstate.Command) (*flowstatev1.AnyCommand, error)
 				},
 			},
 		}, nil
+	case *flowstate.GetManyCommand:
+		var apiLabels []*flowstatev1.GetMany_Labels
+		for _, labels := range cmd1.Labels {
+			apiLabels = append(apiLabels, &flowstatev1.GetMany_Labels{
+				Labels: copyMap(labels),
+			})
+		}
+
+		return &flowstatev1.AnyCommand{
+			Command: &flowstatev1.AnyCommand_GetMany{
+				GetMany: &flowstatev1.GetMany{
+					SinceRev:      cmd1.SinceRev,
+					SinceTimeUsec: cmd1.SinceTime.UnixMicro(),
+					LatestOnly:    cmd1.LatestOnly,
+					Labels:        apiLabels,
+					Limit:         int64(cmd1.Limit),
+				},
+			},
+		}, nil
 	case *flowstate.CommitStateCtxCommand:
 		return &flowstatev1.AnyCommand{
 			Command: &flowstatev1.AnyCommand_CommitState{
@@ -585,6 +631,20 @@ func CommandToAPIResult(cmd flowstate.Command) (*flowstatev1.AnyResult, error) {
 				},
 			},
 		}, nil
+	case *flowstate.GetManyCommand:
+		res, err := cmd1.Result()
+		if err != nil {
+			return nil, err
+		}
+
+		return &flowstatev1.AnyResult{
+			Result: &flowstatev1.AnyResult_GetMany{
+				GetMany: &flowstatev1.GetManyResult{
+					States: ConvertStatesToAPI(res.States),
+					More:   res.More,
+				},
+			},
+		}, nil
 	case *flowstate.CommitStateCtxCommand:
 		return &flowstatev1.AnyResult{
 			Result: &flowstatev1.AnyResult_CommitState{
@@ -689,6 +749,14 @@ func ConvertStateToAPI(s flowstate.State) *flowstatev1.State {
 		Labels:               copyMap(s.Labels),
 		Annotations:          copyMap(s.Annotations),
 	}
+}
+
+func ConvertStatesToAPI(ss []flowstate.State) []*flowstatev1.State {
+	apiSS := make([]*flowstatev1.State, 0, len(ss))
+	for _, s := range ss {
+		apiSS = append(apiSS, ConvertStateToAPI(s))
+	}
+	return apiSS
 }
 
 func ConvertTransitionsToAPI(tss []flowstate.Transition) []*flowstatev1.Transition {

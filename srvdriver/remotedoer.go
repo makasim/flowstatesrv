@@ -13,7 +13,7 @@ import (
 )
 
 type RemoteDoer struct {
-	e  *flowstate.Engine
+	e  flowstate.Engine
 	sc flowstatev1connect.ServerServiceClient
 }
 
@@ -23,7 +23,7 @@ func newRemoteDoer(sc flowstatev1connect.ServerServiceClient) *RemoteDoer {
 	}
 }
 
-func (d *RemoteDoer) Init(e *flowstate.Engine) error {
+func (d *RemoteDoer) Init(e flowstate.Engine) error {
 	d.e = e
 	return nil
 }
@@ -38,13 +38,13 @@ func (d *RemoteDoer) Do(cmd0 flowstate.Command) error {
 		return d.do(cmd0)
 	case *flowstate.DelayCommand:
 		return d.do(cmd0)
-	case *flowstate.WatchCommand:
-		return d.do(cmd0)
 	case *flowstate.StoreDataCommand:
 		return d.do(cmd0)
 	case *flowstate.GetDataCommand:
 		return d.do(cmd0)
 	case *flowstate.GetCommand:
+		return d.do(cmd0)
+	case *flowstate.GetManyCommand:
 		return d.do(cmd0)
 	case *flowstate.CommitStateCtxCommand:
 		return d.do(cmd0)
@@ -315,6 +315,19 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		}
 
 		stateCtx.CopyTo(cmd.StateCtx)
+		return nil
+	case *flowstate.GetManyCommand:
+		if res.GetGetMany() == nil {
+			return fmt.Errorf("unexpected result type %T", res.Result)
+		}
+
+		apiRes := res.GetGetMany()
+
+		cmd.SetResult(&flowstate.GetManyResult{
+			States: convertorv1.ConvertAPIToStates(apiRes.States),
+			More:   apiRes.More,
+		})
+
 		return nil
 	case *flowstate.CommitStateCtxCommand:
 		if res.GetCommitState() == nil {

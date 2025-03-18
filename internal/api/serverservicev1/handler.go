@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
@@ -19,11 +18,11 @@ type flowRegistry interface {
 }
 
 type Service struct {
-	e  *flowstate.Engine
+	e  flowstate.Engine
 	fr flowRegistry
 }
 
-func New(e *flowstate.Engine, fr flowRegistry) *Service {
+func New(e flowstate.Engine, fr flowRegistry) *Service {
 	return &Service{
 		e:  e,
 		fr: fr,
@@ -83,51 +82,6 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 		Data:          convertorv1.ConvertDatasToAPI(datas),
 		Results:       results,
 	}), nil
-}
-
-func (s *Service) WatchStates(ctx context.Context, req *connect.Request[v1.WatchStatesRequest], stream *connect.ServerStream[v1.WatchStatesResponse]) error {
-	wCmd := flowstate.Watch(nil)
-	for i := range req.Msg.Labels {
-		if req.Msg.Labels[i] == nil {
-			continue
-		}
-		wCmd.WithORLabels(req.Msg.Labels[i].Labels)
-	}
-	if req.Msg.SinceRev > 0 {
-		wCmd.WithSinceRev(req.Msg.SinceRev)
-	}
-	if req.Msg.SinceLatest {
-		wCmd.WithSinceLatest()
-	}
-	if req.Msg.SinceTimeUsec > 0 {
-		wCmd.WithSinceTime(time.UnixMicro(req.Msg.GetSinceTimeUsec()))
-	}
-
-	w, err := flowstate.DoWatch(s.e, wCmd)
-	if err != nil {
-		return connect.NewError(connect.CodeInternal, err)
-	}
-	defer w.Close()
-
-	if err := stream.Send(&v1.WatchStatesResponse{
-		Ping: true,
-	}); err != nil {
-		return connect.NewError(connect.CodeInternal, err)
-	}
-
-	for {
-		select {
-		case state := <-w.Listen():
-			apiS := convertorv1.ConvertStateToAPI(state)
-			if err := stream.Send(&v1.WatchStatesResponse{
-				State: apiS,
-			}); err != nil {
-				return connect.NewError(connect.CodeInternal, err)
-			}
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
 }
 
 func (s *Service) RegisterFlow(_ context.Context, req *connect.Request[v1.RegisterFlowRequest]) (*connect.Response[v1.RegisterFlowResponse], error) {
