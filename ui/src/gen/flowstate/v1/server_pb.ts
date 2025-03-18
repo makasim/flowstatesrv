@@ -4,8 +4,8 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { Data, State, StateContext } from "./state_pb.js";
+import { Message, proto3 } from "@bufbuild/protobuf";
+import { Data, StateContext } from "./state_pb.js";
 import { AnyCommand, AnyResult } from "./commands_pb.js";
 
 /**
@@ -140,141 +140,6 @@ export class DoCommandResponse extends Message<DoCommandResponse> {
 
   static equals(a: DoCommandResponse | PlainMessage<DoCommandResponse> | undefined, b: DoCommandResponse | PlainMessage<DoCommandResponse> | undefined): boolean {
     return proto3.util.equals(DoCommandResponse, a, b);
-  }
-}
-
-/**
- * @generated from message flowstate.v1.WatchStatesRequest
- */
-export class WatchStatesRequest extends Message<WatchStatesRequest> {
-  /**
-   * @generated from field: int64 since_rev = 1;
-   */
-  sinceRev = protoInt64.zero;
-
-  /**
-   * @generated from field: bool since_latest = 2;
-   */
-  sinceLatest = false;
-
-  /**
-   * @generated from field: int64 since_time_usec = 3;
-   */
-  sinceTimeUsec = protoInt64.zero;
-
-  /**
-   * @generated from field: repeated flowstate.v1.WatchStatesRequest.Labels labels = 4;
-   */
-  labels: WatchStatesRequest_Labels[] = [];
-
-  constructor(data?: PartialMessage<WatchStatesRequest>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.WatchStatesRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "since_rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 2, name: "since_latest", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 3, name: "since_time_usec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 4, name: "labels", kind: "message", T: WatchStatesRequest_Labels, repeated: true },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WatchStatesRequest {
-    return new WatchStatesRequest().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WatchStatesRequest {
-    return new WatchStatesRequest().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WatchStatesRequest {
-    return new WatchStatesRequest().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: WatchStatesRequest | PlainMessage<WatchStatesRequest> | undefined, b: WatchStatesRequest | PlainMessage<WatchStatesRequest> | undefined): boolean {
-    return proto3.util.equals(WatchStatesRequest, a, b);
-  }
-}
-
-/**
- * @generated from message flowstate.v1.WatchStatesRequest.Labels
- */
-export class WatchStatesRequest_Labels extends Message<WatchStatesRequest_Labels> {
-  /**
-   * @generated from field: map<string, string> labels = 3;
-   */
-  labels: { [key: string]: string } = {};
-
-  constructor(data?: PartialMessage<WatchStatesRequest_Labels>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.WatchStatesRequest.Labels";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 3, name: "labels", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WatchStatesRequest_Labels {
-    return new WatchStatesRequest_Labels().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WatchStatesRequest_Labels {
-    return new WatchStatesRequest_Labels().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WatchStatesRequest_Labels {
-    return new WatchStatesRequest_Labels().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: WatchStatesRequest_Labels | PlainMessage<WatchStatesRequest_Labels> | undefined, b: WatchStatesRequest_Labels | PlainMessage<WatchStatesRequest_Labels> | undefined): boolean {
-    return proto3.util.equals(WatchStatesRequest_Labels, a, b);
-  }
-}
-
-/**
- * @generated from message flowstate.v1.WatchStatesResponse
- */
-export class WatchStatesResponse extends Message<WatchStatesResponse> {
-  /**
-   * @generated from field: flowstate.v1.State state = 1;
-   */
-  state?: State;
-
-  /**
-   * @generated from field: bool ping = 2;
-   */
-  ping = false;
-
-  constructor(data?: PartialMessage<WatchStatesResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.WatchStatesResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state", kind: "message", T: State },
-    { no: 2, name: "ping", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WatchStatesResponse {
-    return new WatchStatesResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WatchStatesResponse {
-    return new WatchStatesResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WatchStatesResponse {
-    return new WatchStatesResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: WatchStatesResponse | PlainMessage<WatchStatesResponse> | undefined, b: WatchStatesResponse | PlainMessage<WatchStatesResponse> | undefined): boolean {
-    return proto3.util.equals(WatchStatesResponse, a, b);
   }
 }
 

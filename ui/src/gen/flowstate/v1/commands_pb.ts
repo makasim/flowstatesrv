@@ -5,7 +5,7 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
-import { DataRef, StateRef } from "./state_pb.js";
+import { DataRef, State, StateRef } from "./state_pb.js";
 
 /**
  * @generated from message flowstate.v1.AnyCommand
@@ -110,6 +110,12 @@ export class AnyCommand extends Message<AnyCommand> {
      */
     value: CommitState;
     case: "commitState";
+  } | {
+    /**
+     * @generated from field: flowstate.v1.GetMany get_many = 17;
+     */
+    value: GetMany;
+    case: "getMany";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<AnyCommand>) {
@@ -136,6 +142,7 @@ export class AnyCommand extends Message<AnyCommand> {
     { no: 14, name: "dereference_data", kind: "message", T: DereferenceData, oneof: "command" },
     { no: 15, name: "get", kind: "message", T: Get, oneof: "command" },
     { no: 16, name: "commit_state", kind: "message", T: CommitState, oneof: "command" },
+    { no: 17, name: "get_many", kind: "message", T: GetMany, oneof: "command" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AnyCommand {
@@ -258,6 +265,12 @@ export class AnyResult extends Message<AnyResult> {
      */
     value: CommitStateResult;
     case: "commitState";
+  } | {
+    /**
+     * @generated from field: flowstate.v1.GetManyResult get_many = 17;
+     */
+    value: GetManyResult;
+    case: "getMany";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   constructor(data?: PartialMessage<AnyResult>) {
@@ -284,6 +297,7 @@ export class AnyResult extends Message<AnyResult> {
     { no: 14, name: "dereference_data", kind: "message", T: DereferenceDataResult, oneof: "result" },
     { no: 15, name: "get", kind: "message", T: GetResult, oneof: "result" },
     { no: 16, name: "commit_state", kind: "message", T: CommitStateResult, oneof: "result" },
+    { no: 17, name: "get_many", kind: "message", T: GetManyResult, oneof: "result" },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AnyResult {
@@ -1634,6 +1648,149 @@ export class GetResult extends Message<GetResult> {
 
   static equals(a: GetResult | PlainMessage<GetResult> | undefined, b: GetResult | PlainMessage<GetResult> | undefined): boolean {
     return proto3.util.equals(GetResult, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetMany
+ */
+export class GetMany extends Message<GetMany> {
+  /**
+   * @generated from field: int64 since_rev = 1;
+   */
+  sinceRev = protoInt64.zero;
+
+  /**
+   * unix milliseconds
+   *
+   * @generated from field: int64 since_time_usec = 2;
+   */
+  sinceTimeUsec = protoInt64.zero;
+
+  /**
+   * @generated from field: repeated flowstate.v1.GetMany.Labels labels = 3;
+   */
+  labels: GetMany_Labels[] = [];
+
+  /**
+   * @generated from field: bool latest_only = 4;
+   */
+  latestOnly = false;
+
+  /**
+   * @generated from field: int64 limit = 5;
+   */
+  limit = protoInt64.zero;
+
+  constructor(data?: PartialMessage<GetMany>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.GetMany";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "since_rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: "since_time_usec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: "labels", kind: "message", T: GetMany_Labels, repeated: true },
+    { no: 4, name: "latest_only", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "limit", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetMany {
+    return new GetMany().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetMany {
+    return new GetMany().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetMany {
+    return new GetMany().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetMany | PlainMessage<GetMany> | undefined, b: GetMany | PlainMessage<GetMany> | undefined): boolean {
+    return proto3.util.equals(GetMany, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetMany.Labels
+ */
+export class GetMany_Labels extends Message<GetMany_Labels> {
+  /**
+   * @generated from field: map<string, string> labels = 3;
+   */
+  labels: { [key: string]: string } = {};
+
+  constructor(data?: PartialMessage<GetMany_Labels>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.GetMany.Labels";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 3, name: "labels", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetMany_Labels {
+    return new GetMany_Labels().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetMany_Labels {
+    return new GetMany_Labels().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetMany_Labels {
+    return new GetMany_Labels().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetMany_Labels | PlainMessage<GetMany_Labels> | undefined, b: GetMany_Labels | PlainMessage<GetMany_Labels> | undefined): boolean {
+    return proto3.util.equals(GetMany_Labels, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetManyResult
+ */
+export class GetManyResult extends Message<GetManyResult> {
+  /**
+   * @generated from field: repeated flowstate.v1.State states = 1;
+   */
+  states: State[] = [];
+
+  /**
+   * @generated from field: bool more = 2;
+   */
+  more = false;
+
+  constructor(data?: PartialMessage<GetManyResult>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.GetManyResult";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "states", kind: "message", T: State, repeated: true },
+    { no: 2, name: "more", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetManyResult {
+    return new GetManyResult().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetManyResult {
+    return new GetManyResult().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetManyResult {
+    return new GetManyResult().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetManyResult | PlainMessage<GetManyResult> | undefined, b: GetManyResult | PlainMessage<GetManyResult> | undefined): boolean {
+    return proto3.util.equals(GetManyResult, a, b);
   }
 }
 
