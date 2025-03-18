@@ -23,7 +23,7 @@ func New(fc clientv1connect.ClientServiceClient) *Flow {
 	}
 }
 
-func (f *Flow) Execute(stateCtx *flowstate.StateCtx, _ *flowstate.Engine) (flowstate.Command, error) {
+func (f *Flow) Execute(stateCtx *flowstate.StateCtx, _ flowstate.Engine) (flowstate.Command, error) {
 	apiStateCtx := convertorv1.ConvertStateCtxToAPI(stateCtx)
 
 	resp, err := f.fc.Execute(context.Background(), connect.NewRequest(&clientv1.ExecuteRequest{

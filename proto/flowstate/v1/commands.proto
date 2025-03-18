@@ -22,6 +22,7 @@ message AnyCommand {
     DereferenceData dereference_data = 14;
     Get get = 15;
     CommitState commit_state = 16;
+    GetMany get_many = 17;
   }
 }
 
@@ -43,6 +44,7 @@ message AnyResult {
     DereferenceDataResult dereference_data = 14;
     GetResult get = 15;
     CommitStateResult commit_state = 16;
+    GetManyResult get_many = 17;
   }
 }
 
@@ -188,7 +190,6 @@ message StoreDataResult {
   DataRef data_ref = 1;
 }
 
-
 message Get {
   string id = 1;
   int64 rev = 2;
@@ -199,4 +200,21 @@ message Get {
 
 message GetResult {
   StateRef state_ref = 4;
+}
+
+message GetMany {
+  message Labels {
+    map<string, string> labels = 3;
+  }
+
+  int64 since_rev = 1;
+  int64 since_time_usec = 2; // unix milliseconds
+  repeated Labels labels = 3;
+  bool latest_only = 4;
+  int64 limit = 5;
+}
+
+message GetManyResult {
+  repeated State states = 1;
+  bool more = 2;
 }

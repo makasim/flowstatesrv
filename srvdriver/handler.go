@@ -11,10 +11,10 @@ import (
 )
 
 type Handler struct {
-	e *flowstate.Engine
+	e flowstate.Engine
 }
 
-func newHandler(e *flowstate.Engine) *Handler {
+func newHandler(e flowstate.Engine) *Handler {
 	return &Handler{
 		e: e,
 	}

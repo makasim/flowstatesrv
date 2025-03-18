@@ -47,7 +47,6 @@ func New(serverHttpHost string) *Driver {
 		flowstate.DefaultReferenceDataDoer,
 
 		newFlowGetter(d.FlowRegistry),
-		newWatcher(d.sc),
 		newRemoteDoer(d.sc),
 	}
 	d.doers = doers
@@ -69,7 +68,7 @@ func (d *Driver) Do(cmd0 flowstate.Command) error {
 	return fmt.Errorf("no doer for command %T", cmd0)
 }
 
-func (d *Driver) Init(e *flowstate.Engine) error {
+func (d *Driver) Init(e flowstate.Engine) error {
 	mux := http.NewServeMux()
 	mux.Handle(clientv1connect.NewClientServiceHandler(newHandler(e)))
 
