@@ -9,39 +9,39 @@ import { Data, State, StateContext } from "./state_pb.js";
 import { AnyCommand, AnyResult } from "./commands_pb.js";
 
 /**
- * @generated from message flowstate.v1.ErrorConflict
+ * @generated from message flowstate.v1.ErrorRevMismatch
  */
-export class ErrorConflict extends Message<ErrorConflict> {
+export class ErrorRevMismatch extends Message<ErrorRevMismatch> {
   /**
    * @generated from field: repeated string committable_state_ids = 2;
    */
   committableStateIds: string[] = [];
 
-  constructor(data?: PartialMessage<ErrorConflict>) {
+  constructor(data?: PartialMessage<ErrorRevMismatch>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.ErrorConflict";
+  static readonly typeName = "flowstate.v1.ErrorRevMismatch";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 2, name: "committable_state_ids", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ErrorConflict {
-    return new ErrorConflict().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ErrorRevMismatch {
+    return new ErrorRevMismatch().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ErrorConflict {
-    return new ErrorConflict().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ErrorRevMismatch {
+    return new ErrorRevMismatch().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ErrorConflict {
-    return new ErrorConflict().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ErrorRevMismatch {
+    return new ErrorRevMismatch().fromJsonString(jsonString, options);
   }
 
-  static equals(a: ErrorConflict | PlainMessage<ErrorConflict> | undefined, b: ErrorConflict | PlainMessage<ErrorConflict> | undefined): boolean {
-    return proto3.util.equals(ErrorConflict, a, b);
+  static equals(a: ErrorRevMismatch | PlainMessage<ErrorRevMismatch> | undefined, b: ErrorRevMismatch | PlainMessage<ErrorRevMismatch> | undefined): boolean {
+    return proto3.util.equals(ErrorRevMismatch, a, b);
   }
 }
 

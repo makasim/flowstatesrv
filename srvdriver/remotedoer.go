@@ -362,13 +362,13 @@ func asRevMismatchError(err error) *flowstate.ErrRevMismatch {
 			continue // usually, errors here mean that we don't have the schema for this Protobuf message
 		}
 
-		if apiRevMismatchErr, ok := msg.(*v1.ErrorConflict); ok {
-			conflictErr := &flowstate.ErrRevMismatch{}
+		if apiRevMismatchErr, ok := msg.(*v1.ErrorRevMismatch); ok {
+			revMismatchErr := &flowstate.ErrRevMismatch{}
 			for _, stateID := range apiRevMismatchErr.CommittableStateIds {
-				conflictErr.Add("", flowstate.StateID(stateID), nil)
+				revMismatchErr.Add("", flowstate.StateID(stateID), nil)
 			}
 
-			return conflictErr
+			return revMismatchErr
 		}
 	}
 

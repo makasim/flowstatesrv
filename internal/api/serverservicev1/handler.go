@@ -51,11 +51,11 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 
 	revMismatchErr := &flowstate.ErrRevMismatch{}
 	if err := s.e.Do(cmds...); errors.As(err, revMismatchErr) {
-		apiConflictErr := &v1.ErrorConflict{}
+		apiRevMismatchErr := &v1.ErrorRevMismatch{}
 		for _, stateID := range revMismatchErr.TaskIDs() {
-			apiConflictErr.CommittableStateIds = append(apiConflictErr.CommittableStateIds, string(stateID))
+			apiRevMismatchErr.CommittableStateIds = append(apiRevMismatchErr.CommittableStateIds, string(stateID))
 		}
-		ed, edErr := connect.NewErrorDetail(apiConflictErr)
+		ed, edErr := connect.NewErrorDetail(apiRevMismatchErr)
 		if edErr != nil {
 			return nil, connect.NewError(connect.CodeInternal, edErr)
 		}
