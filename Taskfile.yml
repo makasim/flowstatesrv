@@ -11,19 +11,32 @@ tasks:
     cmds:
       - |
         go mod tidy && go mod vendor
-        GOOS=linux GOARCH=amd64 go build -o flowstatesrv main/main.go
-      - |
-        COMMIT=$(git rev-list -1 HEAD | cut -c1-8)
-        echo "Building flowstatesrv:$COMMIT"
-        docker build --platform="linux/amd64" -t "flowstatesrv:$COMMIT" .
+        GOOS=linux GOARCH=amd64 go build -o flowstatesrv ./main/
+        
+        VERSION="$(git rev-list -1 HEAD | cut -c1-8)"
+        if [ -n "$(git diff)" ]; then
+          VERSION="${VERSION}-$(git diff | sha1sum | awk '{print $1}' | cut -c1-8)"
+        fi
+        if [ -n "$(git diff --cached)" ]; then
+          VERSION="${VERSION}-$(git diff --cached | sha1sum | awk '{print $1}' | cut -c1-8)"
+        fi
+        echo "Building flowstatesrv:$VERSION"
+        docker build --platform="linux/amd64" -t "flowstatesrv:$VERSION" .
 
   push:
     cmds:
       - |
-        COMMIT=$(git rev-list -1 HEAD | cut -c1-8)
-        docker tag "flowstatesrv:$COMMIT" "registry.makasim.com/flowstatesrv:$COMMIT"
-        docker tag "flowstatesrv:$COMMIT" "registry.makasim.com/flowstatesrv:latest"
-        echo "Pushing registry.makasim.com/flowstatesrv:$COMMIT"
-        docker push "registry.makasim.com/flowstatesrv:$COMMIT"
-        echo "Pushing registry.makasim.com/flowstatesrv:latest"
-        docker push "registry.makasim.com/flowstatesrv:latest"
+        VERSION="$(git rev-list -1 HEAD | cut -c1-8)"
+        if [ -n "$(git diff)" ]; then
+          VERSION="${VERSION}-$(git diff | sha1sum | awk '{print $1}' | cut -c1-8)"
+        fi
+        if [ -n "$(git diff --cached)" ]; then
+          VERSION="${VERSION}-$(git diff --cached | sha1sum | awk '{print $1}' | cut -c1-8)"
+        fi
+        
+        docker tag "flowstatesrv:$VERSION" "registry2.makasim.com/flowstatesrv:$VERSION"
+        docker tag "flowstatesrv:$VERSION" "registry2.makasim.com/flowstatesrv:latest"
+        echo "Pushing registry2.makasim.com/flowstatesrv:$VERSION"
+        docker push "registry2.makasim.com/flowstatesrv:$VERSION"
+        echo "Pushing registry2.makasim.com/flowstatesrv:latest"
+        docker push "registry2.makasim.com/flowstatesrv:latest"

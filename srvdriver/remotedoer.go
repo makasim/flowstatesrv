@@ -66,7 +66,7 @@ func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
 		Data:          apiDatas,
 		Commands:      []*v1.AnyCommand{apiCmd},
 	}))
-	if conflictErr := asCommitConflictError(err); conflictErr != nil {
+	if conflictErr := asRevMismatchError(err); conflictErr != nil {
 		return conflictErr
 	} else if err != nil {
 		return err
@@ -348,7 +348,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 	}
 }
 
-func asCommitConflictError(err error) *flowstate.ErrCommitConflict {
+func asRevMismatchError(err error) *flowstate.ErrRevMismatch {
 	// See https://connectrpc.com/docs/go/errors/#error-details
 
 	var connectErr *connect.Error
@@ -362,9 +362,9 @@ func asCommitConflictError(err error) *flowstate.ErrCommitConflict {
 			continue // usually, errors here mean that we don't have the schema for this Protobuf message
 		}
 
-		if apiErrConflict, ok := msg.(*v1.ErrorConflict); ok {
-			conflictErr := &flowstate.ErrCommitConflict{}
-			for _, stateID := range apiErrConflict.CommittableStateIds {
+		if apiRevMismatchErr, ok := msg.(*v1.ErrorConflict); ok {
+			conflictErr := &flowstate.ErrRevMismatch{}
+			for _, stateID := range apiRevMismatchErr.CommittableStateIds {
 				conflictErr.Add("", flowstate.StateID(stateID), nil)
 			}
 

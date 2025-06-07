@@ -48,10 +48,10 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 		cmds = append(cmds, cmd)
 	}
 
-	conflictErr := &flowstate.ErrCommitConflict{}
-	if err := s.e.Do(cmds...); errors.As(err, conflictErr) {
+	revMismatchErr := &flowstate.ErrRevMismatch{}
+	if err := s.e.Do(cmds...); errors.As(err, revMismatchErr) {
 		apiConflictErr := &v1.ErrorConflict{}
-		for _, stateID := range conflictErr.TaskIDs() {
+		for _, stateID := range revMismatchErr.TaskIDs() {
 			apiConflictErr.CommittableStateIds = append(apiConflictErr.CommittableStateIds, string(stateID))
 		}
 		ed, edErr := connect.NewErrorDetail(apiConflictErr)
