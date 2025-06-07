@@ -55,6 +55,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	mux.Handle("/", corsMW.Wrap(http.FileServerFS(ui.PublicFS())))
 
+	a.l.Info("http server starting", "addr", addr)
 	srv := &http.Server{
 		Addr:    addr,
 		Handler: h2c.NewHandler(mux, &http2.Server{}),

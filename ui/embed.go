@@ -5,10 +5,10 @@ import (
 	"io/fs"
 )
 
-//go:embed public
+//go:embed dist
 var publicFS embed.FS
 
 func PublicFS() fs.FS {
-	fsys, _ := fs.Sub(publicFS, "public")
+	fsys, _ := fs.Sub(publicFS, "dist")
 	return fsys
 }
