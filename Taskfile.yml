@@ -35,8 +35,20 @@ tasks:
         fi
         
         docker tag "flowstatesrv:$VERSION" "registry2.makasim.com/flowstatesrv:$VERSION"
-        docker tag "flowstatesrv:$VERSION" "registry2.makasim.com/flowstatesrv:latest"
         echo "Pushing registry2.makasim.com/flowstatesrv:$VERSION"
         docker push "registry2.makasim.com/flowstatesrv:$VERSION"
-        echo "Pushing registry2.makasim.com/flowstatesrv:latest"
-        docker push "registry2.makasim.com/flowstatesrv:latest"
+
+  deploy:
+    cmds:
+      - |
+        VERSION="$(git rev-list -1 HEAD | cut -c1-8)"
+        if [ -n "$(git diff)" ]; then
+        VERSION="${VERSION}-$(git diff | sha1sum | awk '{print $1}' | cut -c1-8)"
+        fi
+        if [ -n "$(git diff --cached)" ]; then
+        VERSION="${VERSION}-$(git diff --cached | sha1sum | awk '{print $1}' | cut -c1-8)"
+        fi
+        cp "deployment.yaml" "deployment.tmp.yaml"
+        env VERSION="$VERSION" envsubst < "deployment.yaml" > "deployment.tmp.yaml"
+        
+        kubectl -n flowstate apply -f "deployment.tmp.yaml"
