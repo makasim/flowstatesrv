@@ -29,7 +29,33 @@ message RegisterFlowRequest {
 message RegisterFlowResponse {
 }
 
+
+
+
+message WatchStatesRequest {
+  option deprecated = true;
+
+  message Labels {
+    map<string, string> labels = 3;
+  }
+
+  int64 since_rev = 1;
+  bool since_latest = 2;
+  int64 since_time_usec = 3;
+  repeated Labels labels = 4;
+}
+
+message WatchStatesResponse {
+  option deprecated = true;
+
+  State state = 1;
+  bool ping = 2;
+}
+
 service ServerService {
   rpc DoCommand(DoCommandRequest) returns (DoCommandResponse) {}
+  rpc WatchStates(WatchStatesRequest) returns (stream WatchStatesResponse) {
+    option deprecated = true;
+  }
   rpc RegisterFlow(RegisterFlowRequest) returns (RegisterFlowResponse) {}
 }

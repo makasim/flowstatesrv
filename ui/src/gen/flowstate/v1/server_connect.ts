@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { DoCommandRequest, DoCommandResponse, RegisterFlowRequest, RegisterFlowResponse } from "./server_pb.js";
+import { DoCommandRequest, DoCommandResponse, RegisterFlowRequest, RegisterFlowResponse, WatchStatesRequest, WatchStatesResponse } from "./server_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -20,6 +20,16 @@ export const ServerService = {
       I: DoCommandRequest,
       O: DoCommandResponse,
       kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc flowstate.v1.ServerService.WatchStates
+     * @deprecated
+     */
+    watchStates: {
+      name: "WatchStates",
+      I: WatchStatesRequest,
+      O: WatchStatesResponse,
+      kind: MethodKind.ServerStreaming,
     },
     /**
      * @generated from rpc flowstate.v1.ServerService.RegisterFlow

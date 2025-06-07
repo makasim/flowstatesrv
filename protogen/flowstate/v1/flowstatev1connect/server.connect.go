@@ -35,6 +35,9 @@ const (
 const (
 	// ServerServiceDoCommandProcedure is the fully-qualified name of the ServerService's DoCommand RPC.
 	ServerServiceDoCommandProcedure = "/flowstate.v1.ServerService/DoCommand"
+	// ServerServiceWatchStatesProcedure is the fully-qualified name of the ServerService's WatchStates
+	// RPC.
+	ServerServiceWatchStatesProcedure = "/flowstate.v1.ServerService/WatchStates"
 	// ServerServiceRegisterFlowProcedure is the fully-qualified name of the ServerService's
 	// RegisterFlow RPC.
 	ServerServiceRegisterFlowProcedure = "/flowstate.v1.ServerService/RegisterFlow"
@@ -44,12 +47,15 @@ const (
 var (
 	serverServiceServiceDescriptor            = v1.File_flowstate_v1_server_proto.Services().ByName("ServerService")
 	serverServiceDoCommandMethodDescriptor    = serverServiceServiceDescriptor.Methods().ByName("DoCommand")
+	serverServiceWatchStatesMethodDescriptor  = serverServiceServiceDescriptor.Methods().ByName("WatchStates")
 	serverServiceRegisterFlowMethodDescriptor = serverServiceServiceDescriptor.Methods().ByName("RegisterFlow")
 )
 
 // ServerServiceClient is a client for the flowstate.v1.ServerService service.
 type ServerServiceClient interface {
 	DoCommand(context.Context, *connect.Request[v1.DoCommandRequest]) (*connect.Response[v1.DoCommandResponse], error)
+	// Deprecated: do not use.
+	WatchStates(context.Context, *connect.Request[v1.WatchStatesRequest]) (*connect.ServerStreamForClient[v1.WatchStatesResponse], error)
 	RegisterFlow(context.Context, *connect.Request[v1.RegisterFlowRequest]) (*connect.Response[v1.RegisterFlowResponse], error)
 }
 
@@ -69,6 +75,12 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 			connect.WithSchema(serverServiceDoCommandMethodDescriptor),
 			connect.WithClientOptions(opts...),
 		),
+		watchStates: connect.NewClient[v1.WatchStatesRequest, v1.WatchStatesResponse](
+			httpClient,
+			baseURL+ServerServiceWatchStatesProcedure,
+			connect.WithSchema(serverServiceWatchStatesMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		registerFlow: connect.NewClient[v1.RegisterFlowRequest, v1.RegisterFlowResponse](
 			httpClient,
 			baseURL+ServerServiceRegisterFlowProcedure,
@@ -81,12 +93,20 @@ func NewServerServiceClient(httpClient connect.HTTPClient, baseURL string, opts 
 // serverServiceClient implements ServerServiceClient.
 type serverServiceClient struct {
 	doCommand    *connect.Client[v1.DoCommandRequest, v1.DoCommandResponse]
+	watchStates  *connect.Client[v1.WatchStatesRequest, v1.WatchStatesResponse]
 	registerFlow *connect.Client[v1.RegisterFlowRequest, v1.RegisterFlowResponse]
 }
 
 // DoCommand calls flowstate.v1.ServerService.DoCommand.
 func (c *serverServiceClient) DoCommand(ctx context.Context, req *connect.Request[v1.DoCommandRequest]) (*connect.Response[v1.DoCommandResponse], error) {
 	return c.doCommand.CallUnary(ctx, req)
+}
+
+// WatchStates calls flowstate.v1.ServerService.WatchStates.
+//
+// Deprecated: do not use.
+func (c *serverServiceClient) WatchStates(ctx context.Context, req *connect.Request[v1.WatchStatesRequest]) (*connect.ServerStreamForClient[v1.WatchStatesResponse], error) {
+	return c.watchStates.CallServerStream(ctx, req)
 }
 
 // RegisterFlow calls flowstate.v1.ServerService.RegisterFlow.
@@ -97,6 +117,8 @@ func (c *serverServiceClient) RegisterFlow(ctx context.Context, req *connect.Req
 // ServerServiceHandler is an implementation of the flowstate.v1.ServerService service.
 type ServerServiceHandler interface {
 	DoCommand(context.Context, *connect.Request[v1.DoCommandRequest]) (*connect.Response[v1.DoCommandResponse], error)
+	// Deprecated: do not use.
+	WatchStates(context.Context, *connect.Request[v1.WatchStatesRequest], *connect.ServerStream[v1.WatchStatesResponse]) error
 	RegisterFlow(context.Context, *connect.Request[v1.RegisterFlowRequest]) (*connect.Response[v1.RegisterFlowResponse], error)
 }
 
@@ -112,6 +134,12 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 		connect.WithSchema(serverServiceDoCommandMethodDescriptor),
 		connect.WithHandlerOptions(opts...),
 	)
+	serverServiceWatchStatesHandler := connect.NewServerStreamHandler(
+		ServerServiceWatchStatesProcedure,
+		svc.WatchStates,
+		connect.WithSchema(serverServiceWatchStatesMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	serverServiceRegisterFlowHandler := connect.NewUnaryHandler(
 		ServerServiceRegisterFlowProcedure,
 		svc.RegisterFlow,
@@ -122,6 +150,8 @@ func NewServerServiceHandler(svc ServerServiceHandler, opts ...connect.HandlerOp
 		switch r.URL.Path {
 		case ServerServiceDoCommandProcedure:
 			serverServiceDoCommandHandler.ServeHTTP(w, r)
+		case ServerServiceWatchStatesProcedure:
+			serverServiceWatchStatesHandler.ServeHTTP(w, r)
 		case ServerServiceRegisterFlowProcedure:
 			serverServiceRegisterFlowHandler.ServeHTTP(w, r)
 		default:
@@ -135,6 +165,10 @@ type UnimplementedServerServiceHandler struct{}
 
 func (UnimplementedServerServiceHandler) DoCommand(context.Context, *connect.Request[v1.DoCommandRequest]) (*connect.Response[v1.DoCommandResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("flowstate.v1.ServerService.DoCommand is not implemented"))
+}
+
+func (UnimplementedServerServiceHandler) WatchStates(context.Context, *connect.Request[v1.WatchStatesRequest], *connect.ServerStream[v1.WatchStatesResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("flowstate.v1.ServerService.WatchStates is not implemented"))
 }
 
 func (UnimplementedServerServiceHandler) RegisterFlow(context.Context, *connect.Request[v1.RegisterFlowRequest]) (*connect.Response[v1.RegisterFlowResponse], error) {

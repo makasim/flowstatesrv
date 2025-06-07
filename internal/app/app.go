@@ -15,6 +15,7 @@ import (
 	"github.com/makasim/flowstatesrv/internal/api/corsmiddleware"
 	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
+	"github.com/makasim/flowstatesrv/ui"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -51,6 +52,8 @@ func (a *App) Run(ctx context.Context) error {
 	mux := http.NewServeMux()
 
 	mux.Handle(corsMW.WrapPath(flowstatev1connect.NewServerServiceHandler(serverservicev1.New(e, d))))
+
+	mux.Handle("/", corsMW.Wrap(http.FileServerFS(ui.PublicFS())))
 
 	srv := &http.Server{
 		Addr:    addr,

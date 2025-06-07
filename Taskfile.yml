@@ -10,6 +10,11 @@ tasks:
   build:
     cmds:
       - |
+        cd ui
+        pnpm i
+        pnpm build
+
+      - |
         go mod tidy && go mod vendor
         GOOS=linux GOARCH=arm64 go build -o flowstatesrv ./main/
         
