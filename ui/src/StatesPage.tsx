@@ -15,6 +15,8 @@ import {
 } from "./components/ui/dialog";
 import { ApiContext } from "./ApiContext";
 import { AnnotationDetails } from "./AnnotationDetails";
+import { GetMany, AnyCommand } from "./gen/flowstate/v1/commands_pb";
+import { DoCommandRequest } from "./gen/flowstate/v1/server_pb";
 
 type StateData = {
   id: string;
@@ -133,16 +135,71 @@ export const StatesPage = () => {
       console.log("Listening error", error)
     );
 
-    return () => abortController.abort();
+    return () => {
+      abortController.abort();
+    };
   }, [client]);
 
-  async function listenToStates(client: ApiClient, signal: AbortSignal) {
-    for await (const res of client.watchStates({}, { signal })) {
-      console.log(res);
-      if (res.ping) continue;
-      setStates((v) => (res.state ? [res.state, ...v] : v));
-    }
-  }
+  const listenToStates = async (client: ApiClient, signal: AbortSignal) => {
+    let sinceRev = BigInt(0);
+    let intervalId: NodeJS.Timeout;
+
+    const pollStates = async () => {
+      if (signal.aborted) return;
+
+      const getManyCommand = new GetMany({
+        limit: BigInt(100),
+        latestOnly: false,
+        sinceRev: sinceRev,
+      });
+
+      const anyCommand = new AnyCommand({
+        command: {
+          case: "getMany",
+          value: getManyCommand,
+        },
+      });
+
+      const request = new DoCommandRequest({
+        commands: [anyCommand],
+      });
+
+      try {
+        const response = await client.doCommand(request, { signal });
+        console.log(response);
+
+        if (response.results.length > 0) {
+          const result = response.results[0];
+          if (result.result.case === "getMany") {
+            const getManyResult = result.result.value;
+            
+            if (getManyResult.states.length > 0) {
+              setStates(currentStates => {
+                const newStates = [...currentStates, ...getManyResult.states];
+                return newStates.sort((a, b) => Number(b.rev - a.rev));
+              });
+              
+              const maxRev = getManyResult.states.reduce((max, state) => 
+                state.rev > max ? state.rev : max, sinceRev);
+              sinceRev = maxRev;
+            }
+          }
+        }
+      } catch (error) {
+        if (!signal.aborted) {
+          console.log("Command error", error);
+        }
+      }
+    };
+
+    await pollStates();
+    
+    intervalId = setInterval(pollStates, 1000);
+    
+    signal.addEventListener('abort', () => {
+      clearInterval(intervalId);
+    });
+  };
 
   function formatTransition({ from, to }: { from: string; to: string }) {
     return from && from !== to ? `${from} -> ${to}` : to;

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
 
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
@@ -83,49 +82,6 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 		Data:          convertorv1.ConvertDatasToAPI(datas),
 		Results:       results,
 	}), nil
-}
-
-func (s *Service) WatchStates(ctx context.Context, req *connect.Request[v1.WatchStatesRequest], stream *connect.ServerStream[v1.WatchStatesResponse]) error {
-	getManyCmd := flowstate.GetManyByLabels(nil)
-
-	for i := range req.Msg.Labels {
-		if req.Msg.Labels[i] == nil {
-			continue
-		}
-		getManyCmd.WithORLabels(req.Msg.Labels[i].Labels)
-	}
-	if req.Msg.SinceRev > 0 {
-		getManyCmd.WithSinceRev(req.Msg.SinceRev)
-	}
-	if req.Msg.SinceLatest {
-		getManyCmd.WithSinceLatest()
-	}
-	if req.Msg.SinceTimeUsec > 0 {
-		getManyCmd.WithSinceTime(time.UnixMicro(req.Msg.GetSinceTimeUsec()))
-	}
-
-	w := flowstate.NewWatcher(s.e, getManyCmd)
-	defer w.Close()
-
-	if err := stream.Send(&v1.WatchStatesResponse{
-		Ping: true,
-	}); err != nil {
-		return connect.NewError(connect.CodeInternal, err)
-	}
-
-	for {
-		select {
-		case state := <-w.Next():
-			apiS := convertorv1.ConvertStateToAPI(state)
-			if err := stream.Send(&v1.WatchStatesResponse{
-				State: apiS,
-			}); err != nil {
-				return connect.NewError(connect.CodeInternal, err)
-			}
-		case <-ctx.Done():
-			return ctx.Err()
-		}
-	}
 }
 
 func (s *Service) RegisterFlow(_ context.Context, req *connect.Request[v1.RegisterFlowRequest]) (*connect.Response[v1.RegisterFlowResponse], error) {
