@@ -12,6 +12,7 @@ import (
 
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/memdriver"
+	"github.com/makasim/flowstate/recovery"
 	"github.com/makasim/flowstatesrv/internal/api/corsmiddleware"
 	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
@@ -42,7 +43,12 @@ func (a *App) Run(ctx context.Context) error {
 		return fmt.Errorf("new engine: %w", err)
 	}
 
-	addr := `127.0.0.1:8080`
+	r := recovery.New(e, a.l)
+	if err := r.Init(); err != nil {
+		return fmt.Errorf("recovery init: %w", err)
+	}
+
+	addr := `0:8080`
 	if os.Getenv(`FLOWSTATESRV_ADDR`) != `` {
 		addr = os.Getenv(`FLOWSTATESRV_ADDR`)
 	}
@@ -75,6 +81,10 @@ func (a *App) Run(ctx context.Context) error {
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
 		shutdownRes = errors.Join(shutdownRes, fmt.Errorf("http server: shutdown: %w", err))
+	}
+
+	if err := r.Shutdown(shutdownCtx); err != nil {
+		shutdownRes = errors.Join(shutdownRes, fmt.Errorf("recovery: shutdown: %w", err))
 	}
 
 	if err := e.Shutdown(shutdownCtx); err != nil {

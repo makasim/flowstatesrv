@@ -12,13 +12,13 @@ message ErrorRevMismatch {
 message DoCommandRequest {
   repeated StateContext state_contexts = 1;
   repeated Data data = 2;
-  repeated AnyCommand commands = 3;
+  repeated Command commands = 3;
 }
 
 message DoCommandResponse {
   repeated StateContext state_contexts = 1;
   repeated Data data = 2;
-  repeated AnyResult results = 3;
+  repeated Result results = 3;
 }
 
 message RegisterFlowRequest {

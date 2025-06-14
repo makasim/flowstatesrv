@@ -6,7 +6,7 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { Data, StateContext } from "./state_pb.js";
-import { AnyCommand, AnyResult } from "./commands_pb.js";
+import { Command, Result } from "./commands_pb.js";
 
 /**
  * @generated from message flowstate.v1.ErrorRevMismatch
@@ -60,9 +60,9 @@ export class DoCommandRequest extends Message<DoCommandRequest> {
   data: Data[] = [];
 
   /**
-   * @generated from field: repeated flowstate.v1.AnyCommand commands = 3;
+   * @generated from field: repeated flowstate.v1.Command commands = 3;
    */
-  commands: AnyCommand[] = [];
+  commands: Command[] = [];
 
   constructor(data?: PartialMessage<DoCommandRequest>) {
     super();
@@ -74,7 +74,7 @@ export class DoCommandRequest extends Message<DoCommandRequest> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "state_contexts", kind: "message", T: StateContext, repeated: true },
     { no: 2, name: "data", kind: "message", T: Data, repeated: true },
-    { no: 3, name: "commands", kind: "message", T: AnyCommand, repeated: true },
+    { no: 3, name: "commands", kind: "message", T: Command, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DoCommandRequest {
@@ -109,9 +109,9 @@ export class DoCommandResponse extends Message<DoCommandResponse> {
   data: Data[] = [];
 
   /**
-   * @generated from field: repeated flowstate.v1.AnyResult results = 3;
+   * @generated from field: repeated flowstate.v1.Result results = 3;
    */
-  results: AnyResult[] = [];
+  results: Result[] = [];
 
   constructor(data?: PartialMessage<DoCommandResponse>) {
     super();
@@ -123,7 +123,7 @@ export class DoCommandResponse extends Message<DoCommandResponse> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "state_contexts", kind: "message", T: StateContext, repeated: true },
     { no: 2, name: "data", kind: "message", T: Data, repeated: true },
-    { no: 3, name: "results", kind: "message", T: AnyResult, repeated: true },
+    { no: 3, name: "results", kind: "message", T: Result, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DoCommandResponse {

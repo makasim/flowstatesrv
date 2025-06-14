@@ -64,7 +64,7 @@ func (d *RemoteDoer) do(cmd0 flowstate.Command) error {
 	resp, err := d.sc.DoCommand(context.Background(), connect.NewRequest(&v1.DoCommandRequest{
 		StateContexts: apiStateCtxs,
 		Data:          apiDatas,
-		Commands:      []*v1.AnyCommand{apiCmd},
+		Commands:      []*v1.Command{apiCmd},
 	}))
 	if conflictErr := asRevMismatchError(err); conflictErr != nil {
 		return conflictErr
@@ -96,11 +96,11 @@ func syncCommandWithDoResponse(cmds []flowstate.Command, resp *v1.DoCommandRespo
 	return nil
 }
 
-func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs []*flowstate.StateCtx, datas []*flowstate.Data) error {
+func syncCommandWithResult(cmd0 flowstate.Command, res *v1.Result, stateCtxs []*flowstate.StateCtx, datas []*flowstate.Data) error {
 	switch cmd := cmd0.(type) {
 	case *flowstate.TransitCommand:
 		if res.GetTransit() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got transit nil result")
 		}
 
 		apiRes := res.GetTransit()
@@ -113,7 +113,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.PauseCommand:
 		if res.GetPause() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got pause nil result")
 		}
 
 		apiRes := res.GetPause()
@@ -127,7 +127,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.ResumeCommand:
 		if res.GetResume() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got resume nil result")
 		}
 
 		apiRes := res.GetResume()
@@ -141,7 +141,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.EndCommand:
 		if res.GetEnd() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got end nil result")
 		}
 
 		apiRes := res.GetEnd()
@@ -155,7 +155,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.ExecuteCommand:
 		if res.GetExecute() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got execute nil result")
 		}
 
 		apiRes := res.GetExecute()
@@ -169,7 +169,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.DelayCommand:
 		if res.GetDelay() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got delay nil result")
 		}
 
 		apiRes := res.GetDelay()
@@ -183,7 +183,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.SerializeCommand:
 		if res.GetSerialize() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got serialize nil result")
 		}
 
 		apiRes := res.GetSerialize()
@@ -203,7 +203,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.DeserializeCommand:
 		if res.GetDeserialize() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got deserialize nil result")
 		}
 
 		apiRes := res.GetDeserialize()
@@ -223,7 +223,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.CommitCommand:
 		if res.GetCommit() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got commit nil result")
 		}
 
 		apiRes := res.GetCommit()
@@ -240,7 +240,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.StoreDataCommand:
 		if res.GetStoreData() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got store data nil result")
 		}
 		apiRes := res.GetStoreData()
 		d, err := convertorv1.FindDataByRef(apiRes.DataRef, datas)
@@ -251,7 +251,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.GetDataCommand:
 		if res.GetGetData() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got get data nil result")
 		}
 
 		apiRes := res.GetGetData()
@@ -264,7 +264,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.ReferenceDataCommand:
 		if res.GetReferenceData() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("get reference data nil result")
 		}
 
 		apiRes := res.GetReferenceData()
@@ -284,7 +284,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.DereferenceDataCommand:
 		if res.GetDereferenceData() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got dereference data nil result")
 		}
 
 		apiRes := res.GetDereferenceData()
@@ -304,7 +304,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.GetCommand:
 		if res.GetGet() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got get nil result")
 		}
 
 		apiRes := res.GetGet()
@@ -318,7 +318,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.GetManyCommand:
 		if res.GetGetMany() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got get many nil result")
 		}
 
 		apiRes := res.GetGetMany()
@@ -331,7 +331,7 @@ func syncCommandWithResult(cmd0 flowstate.Command, res *v1.AnyResult, stateCtxs 
 		return nil
 	case *flowstate.CommitStateCtxCommand:
 		if res.GetCommitState() == nil {
-			return fmt.Errorf("unexpected result type %T", res.Result)
+			return fmt.Errorf("got commit state nil result")
 		}
 
 		apiRes := res.GetCommitState()
