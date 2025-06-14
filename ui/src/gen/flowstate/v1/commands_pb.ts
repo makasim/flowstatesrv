@@ -8,312 +8,268 @@ import { Message, proto3, protoInt64 } from "@bufbuild/protobuf";
 import { DataRef, State, StateRef } from "./state_pb.js";
 
 /**
- * @generated from message flowstate.v1.AnyCommand
+ * @generated from message flowstate.v1.Command
  */
-export class AnyCommand extends Message<AnyCommand> {
+export class Command extends Message<Command> {
   /**
-   * @generated from oneof flowstate.v1.AnyCommand.command
+   * @generated from field: flowstate.v1.Transit transit = 1;
    */
-  command: {
-    /**
-     * @generated from field: flowstate.v1.Transit transit = 1;
-     */
-    value: Transit;
-    case: "transit";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Pause pause = 2;
-     */
-    value: Pause;
-    case: "pause";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Resume resume = 3;
-     */
-    value: Resume;
-    case: "resume";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.End end = 4;
-     */
-    value: End;
-    case: "end";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Execute execute = 5;
-     */
-    value: Execute;
-    case: "execute";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Delay delay = 6;
-     */
-    value: Delay;
-    case: "delay";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Commit commit = 7;
-     */
-    value: Commit;
-    case: "commit";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Noop noop = 8;
-     */
-    value: Noop;
-    case: "noop";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Serialize serialize = 9;
-     */
-    value: Serialize;
-    case: "serialize";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Deserialize deserialize = 10;
-     */
-    value: Deserialize;
-    case: "deserialize";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.StoreData store_data = 11;
-     */
-    value: StoreData;
-    case: "storeData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.GetData get_data = 12;
-     */
-    value: GetData;
-    case: "getData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.ReferenceData reference_data = 13;
-     */
-    value: ReferenceData;
-    case: "referenceData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.DereferenceData dereference_data = 14;
-     */
-    value: DereferenceData;
-    case: "dereferenceData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.Get get = 15;
-     */
-    value: Get;
-    case: "get";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.CommitState commit_state = 16;
-     */
-    value: CommitState;
-    case: "commitState";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.GetMany get_many = 17;
-     */
-    value: GetMany;
-    case: "getMany";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  transit?: Transit;
 
-  constructor(data?: PartialMessage<AnyCommand>) {
+  /**
+   * @generated from field: flowstate.v1.Pause pause = 2;
+   */
+  pause?: Pause;
+
+  /**
+   * @generated from field: flowstate.v1.Resume resume = 3;
+   */
+  resume?: Resume;
+
+  /**
+   * @generated from field: flowstate.v1.End end = 4;
+   */
+  end?: End;
+
+  /**
+   * @generated from field: flowstate.v1.Execute execute = 5;
+   */
+  execute?: Execute;
+
+  /**
+   * @generated from field: flowstate.v1.Delay delay = 6;
+   */
+  delay?: Delay;
+
+  /**
+   * @generated from field: flowstate.v1.Commit commit = 7;
+   */
+  commit?: Commit;
+
+  /**
+   * @generated from field: flowstate.v1.Noop noop = 8;
+   */
+  noop?: Noop;
+
+  /**
+   * @generated from field: flowstate.v1.Serialize serialize = 9;
+   */
+  serialize?: Serialize;
+
+  /**
+   * @generated from field: flowstate.v1.Deserialize deserialize = 10;
+   */
+  deserialize?: Deserialize;
+
+  /**
+   * @generated from field: flowstate.v1.StoreData store_data = 11;
+   */
+  storeData?: StoreData;
+
+  /**
+   * @generated from field: flowstate.v1.GetData get_data = 12;
+   */
+  getData?: GetData;
+
+  /**
+   * @generated from field: flowstate.v1.ReferenceData reference_data = 13;
+   */
+  referenceData?: ReferenceData;
+
+  /**
+   * @generated from field: flowstate.v1.DereferenceData dereference_data = 14;
+   */
+  dereferenceData?: DereferenceData;
+
+  /**
+   * @generated from field: flowstate.v1.Get get = 15;
+   */
+  get?: Get;
+
+  /**
+   * @generated from field: flowstate.v1.CommitState commit_state = 16;
+   */
+  commitState?: CommitState;
+
+  /**
+   * @generated from field: flowstate.v1.GetMany get_many = 17;
+   */
+  getMany?: GetMany;
+
+  constructor(data?: PartialMessage<Command>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.AnyCommand";
+  static readonly typeName = "flowstate.v1.Command";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "transit", kind: "message", T: Transit, oneof: "command" },
-    { no: 2, name: "pause", kind: "message", T: Pause, oneof: "command" },
-    { no: 3, name: "resume", kind: "message", T: Resume, oneof: "command" },
-    { no: 4, name: "end", kind: "message", T: End, oneof: "command" },
-    { no: 5, name: "execute", kind: "message", T: Execute, oneof: "command" },
-    { no: 6, name: "delay", kind: "message", T: Delay, oneof: "command" },
-    { no: 7, name: "commit", kind: "message", T: Commit, oneof: "command" },
-    { no: 8, name: "noop", kind: "message", T: Noop, oneof: "command" },
-    { no: 9, name: "serialize", kind: "message", T: Serialize, oneof: "command" },
-    { no: 10, name: "deserialize", kind: "message", T: Deserialize, oneof: "command" },
-    { no: 11, name: "store_data", kind: "message", T: StoreData, oneof: "command" },
-    { no: 12, name: "get_data", kind: "message", T: GetData, oneof: "command" },
-    { no: 13, name: "reference_data", kind: "message", T: ReferenceData, oneof: "command" },
-    { no: 14, name: "dereference_data", kind: "message", T: DereferenceData, oneof: "command" },
-    { no: 15, name: "get", kind: "message", T: Get, oneof: "command" },
-    { no: 16, name: "commit_state", kind: "message", T: CommitState, oneof: "command" },
-    { no: 17, name: "get_many", kind: "message", T: GetMany, oneof: "command" },
+    { no: 1, name: "transit", kind: "message", T: Transit },
+    { no: 2, name: "pause", kind: "message", T: Pause },
+    { no: 3, name: "resume", kind: "message", T: Resume },
+    { no: 4, name: "end", kind: "message", T: End },
+    { no: 5, name: "execute", kind: "message", T: Execute },
+    { no: 6, name: "delay", kind: "message", T: Delay },
+    { no: 7, name: "commit", kind: "message", T: Commit },
+    { no: 8, name: "noop", kind: "message", T: Noop },
+    { no: 9, name: "serialize", kind: "message", T: Serialize },
+    { no: 10, name: "deserialize", kind: "message", T: Deserialize },
+    { no: 11, name: "store_data", kind: "message", T: StoreData },
+    { no: 12, name: "get_data", kind: "message", T: GetData },
+    { no: 13, name: "reference_data", kind: "message", T: ReferenceData },
+    { no: 14, name: "dereference_data", kind: "message", T: DereferenceData },
+    { no: 15, name: "get", kind: "message", T: Get },
+    { no: 16, name: "commit_state", kind: "message", T: CommitState },
+    { no: 17, name: "get_many", kind: "message", T: GetMany },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AnyCommand {
-    return new AnyCommand().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Command {
+    return new Command().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AnyCommand {
-    return new AnyCommand().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Command {
+    return new Command().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AnyCommand {
-    return new AnyCommand().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Command {
+    return new Command().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AnyCommand | PlainMessage<AnyCommand> | undefined, b: AnyCommand | PlainMessage<AnyCommand> | undefined): boolean {
-    return proto3.util.equals(AnyCommand, a, b);
+  static equals(a: Command | PlainMessage<Command> | undefined, b: Command | PlainMessage<Command> | undefined): boolean {
+    return proto3.util.equals(Command, a, b);
   }
 }
 
 /**
- * @generated from message flowstate.v1.AnyResult
+ * @generated from message flowstate.v1.Result
  */
-export class AnyResult extends Message<AnyResult> {
+export class Result extends Message<Result> {
   /**
-   * @generated from oneof flowstate.v1.AnyResult.result
+   * @generated from field: flowstate.v1.TransitResult transit = 1;
    */
-  result: {
-    /**
-     * @generated from field: flowstate.v1.TransitResult transit = 1;
-     */
-    value: TransitResult;
-    case: "transit";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.PauseResult pause = 2;
-     */
-    value: PauseResult;
-    case: "pause";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.ResumeResult resume = 3;
-     */
-    value: ResumeResult;
-    case: "resume";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.EndResult end = 4;
-     */
-    value: EndResult;
-    case: "end";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.ExecuteResult execute = 5;
-     */
-    value: ExecuteResult;
-    case: "execute";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.DelayResult delay = 6;
-     */
-    value: DelayResult;
-    case: "delay";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.CommitResult commit = 7;
-     */
-    value: CommitResult;
-    case: "commit";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.NoopResult noop = 8;
-     */
-    value: NoopResult;
-    case: "noop";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.SerializeResult serialize = 9;
-     */
-    value: SerializeResult;
-    case: "serialize";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.DeserializeResult deserialize = 10;
-     */
-    value: DeserializeResult;
-    case: "deserialize";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.StoreDataResult store_data = 11;
-     */
-    value: StoreDataResult;
-    case: "storeData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.GetDataResult get_data = 12;
-     */
-    value: GetDataResult;
-    case: "getData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.ReferenceDataResult reference_data = 13;
-     */
-    value: ReferenceDataResult;
-    case: "referenceData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.DereferenceDataResult dereference_data = 14;
-     */
-    value: DereferenceDataResult;
-    case: "dereferenceData";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.GetResult get = 15;
-     */
-    value: GetResult;
-    case: "get";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.CommitStateResult commit_state = 16;
-     */
-    value: CommitStateResult;
-    case: "commitState";
-  } | {
-    /**
-     * @generated from field: flowstate.v1.GetManyResult get_many = 17;
-     */
-    value: GetManyResult;
-    case: "getMany";
-  } | { case: undefined; value?: undefined } = { case: undefined };
+  transit?: TransitResult;
 
-  constructor(data?: PartialMessage<AnyResult>) {
+  /**
+   * @generated from field: flowstate.v1.PauseResult pause = 2;
+   */
+  pause?: PauseResult;
+
+  /**
+   * @generated from field: flowstate.v1.ResumeResult resume = 3;
+   */
+  resume?: ResumeResult;
+
+  /**
+   * @generated from field: flowstate.v1.EndResult end = 4;
+   */
+  end?: EndResult;
+
+  /**
+   * @generated from field: flowstate.v1.ExecuteResult execute = 5;
+   */
+  execute?: ExecuteResult;
+
+  /**
+   * @generated from field: flowstate.v1.DelayResult delay = 6;
+   */
+  delay?: DelayResult;
+
+  /**
+   * @generated from field: flowstate.v1.CommitResult commit = 7;
+   */
+  commit?: CommitResult;
+
+  /**
+   * @generated from field: flowstate.v1.NoopResult noop = 8;
+   */
+  noop?: NoopResult;
+
+  /**
+   * @generated from field: flowstate.v1.SerializeResult serialize = 9;
+   */
+  serialize?: SerializeResult;
+
+  /**
+   * @generated from field: flowstate.v1.DeserializeResult deserialize = 10;
+   */
+  deserialize?: DeserializeResult;
+
+  /**
+   * @generated from field: flowstate.v1.StoreDataResult store_data = 11;
+   */
+  storeData?: StoreDataResult;
+
+  /**
+   * @generated from field: flowstate.v1.GetDataResult get_data = 12;
+   */
+  getData?: GetDataResult;
+
+  /**
+   * @generated from field: flowstate.v1.ReferenceDataResult reference_data = 13;
+   */
+  referenceData?: ReferenceDataResult;
+
+  /**
+   * @generated from field: flowstate.v1.DereferenceDataResult dereference_data = 14;
+   */
+  dereferenceData?: DereferenceDataResult;
+
+  /**
+   * @generated from field: flowstate.v1.GetResult get = 15;
+   */
+  get?: GetResult;
+
+  /**
+   * @generated from field: flowstate.v1.CommitStateResult commit_state = 16;
+   */
+  commitState?: CommitStateResult;
+
+  /**
+   * @generated from field: flowstate.v1.GetManyResult get_many = 17;
+   */
+  getMany?: GetManyResult;
+
+  constructor(data?: PartialMessage<Result>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.AnyResult";
+  static readonly typeName = "flowstate.v1.Result";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "transit", kind: "message", T: TransitResult, oneof: "result" },
-    { no: 2, name: "pause", kind: "message", T: PauseResult, oneof: "result" },
-    { no: 3, name: "resume", kind: "message", T: ResumeResult, oneof: "result" },
-    { no: 4, name: "end", kind: "message", T: EndResult, oneof: "result" },
-    { no: 5, name: "execute", kind: "message", T: ExecuteResult, oneof: "result" },
-    { no: 6, name: "delay", kind: "message", T: DelayResult, oneof: "result" },
-    { no: 7, name: "commit", kind: "message", T: CommitResult, oneof: "result" },
-    { no: 8, name: "noop", kind: "message", T: NoopResult, oneof: "result" },
-    { no: 9, name: "serialize", kind: "message", T: SerializeResult, oneof: "result" },
-    { no: 10, name: "deserialize", kind: "message", T: DeserializeResult, oneof: "result" },
-    { no: 11, name: "store_data", kind: "message", T: StoreDataResult, oneof: "result" },
-    { no: 12, name: "get_data", kind: "message", T: GetDataResult, oneof: "result" },
-    { no: 13, name: "reference_data", kind: "message", T: ReferenceDataResult, oneof: "result" },
-    { no: 14, name: "dereference_data", kind: "message", T: DereferenceDataResult, oneof: "result" },
-    { no: 15, name: "get", kind: "message", T: GetResult, oneof: "result" },
-    { no: 16, name: "commit_state", kind: "message", T: CommitStateResult, oneof: "result" },
-    { no: 17, name: "get_many", kind: "message", T: GetManyResult, oneof: "result" },
+    { no: 1, name: "transit", kind: "message", T: TransitResult },
+    { no: 2, name: "pause", kind: "message", T: PauseResult },
+    { no: 3, name: "resume", kind: "message", T: ResumeResult },
+    { no: 4, name: "end", kind: "message", T: EndResult },
+    { no: 5, name: "execute", kind: "message", T: ExecuteResult },
+    { no: 6, name: "delay", kind: "message", T: DelayResult },
+    { no: 7, name: "commit", kind: "message", T: CommitResult },
+    { no: 8, name: "noop", kind: "message", T: NoopResult },
+    { no: 9, name: "serialize", kind: "message", T: SerializeResult },
+    { no: 10, name: "deserialize", kind: "message", T: DeserializeResult },
+    { no: 11, name: "store_data", kind: "message", T: StoreDataResult },
+    { no: 12, name: "get_data", kind: "message", T: GetDataResult },
+    { no: 13, name: "reference_data", kind: "message", T: ReferenceDataResult },
+    { no: 14, name: "dereference_data", kind: "message", T: DereferenceDataResult },
+    { no: 15, name: "get", kind: "message", T: GetResult },
+    { no: 16, name: "commit_state", kind: "message", T: CommitStateResult },
+    { no: 17, name: "get_many", kind: "message", T: GetManyResult },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AnyResult {
-    return new AnyResult().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Result {
+    return new Result().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AnyResult {
-    return new AnyResult().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Result {
+    return new Result().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AnyResult {
-    return new AnyResult().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Result {
+    return new Result().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AnyResult | PlainMessage<AnyResult> | undefined, b: AnyResult | PlainMessage<AnyResult> | undefined): boolean {
-    return proto3.util.equals(AnyResult, a, b);
+  static equals(a: Result | PlainMessage<Result> | undefined, b: Result | PlainMessage<Result> | undefined): boolean {
+    return proto3.util.equals(Result, a, b);
   }
 }
 
@@ -802,9 +758,9 @@ export class DelayResult extends Message<DelayResult> {
  */
 export class Commit extends Message<Commit> {
   /**
-   * @generated from field: repeated flowstate.v1.AnyCommand commands = 2;
+   * @generated from field: repeated flowstate.v1.Command commands = 2;
    */
-  commands: AnyCommand[] = [];
+  commands: Command[] = [];
 
   constructor(data?: PartialMessage<Commit>) {
     super();
@@ -814,7 +770,7 @@ export class Commit extends Message<Commit> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.Commit";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 2, name: "commands", kind: "message", T: AnyCommand, repeated: true },
+    { no: 2, name: "commands", kind: "message", T: Command, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Commit {
@@ -839,9 +795,9 @@ export class Commit extends Message<Commit> {
  */
 export class CommitResult extends Message<CommitResult> {
   /**
-   * @generated from field: repeated flowstate.v1.AnyResult results = 3;
+   * @generated from field: repeated flowstate.v1.Result results = 3;
    */
-  results: AnyResult[] = [];
+  results: Result[] = [];
 
   constructor(data?: PartialMessage<CommitResult>) {
     super();
@@ -851,7 +807,7 @@ export class CommitResult extends Message<CommitResult> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.CommitResult";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 3, name: "results", kind: "message", T: AnyResult, repeated: true },
+    { no: 3, name: "results", kind: "message", T: Result, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitResult {

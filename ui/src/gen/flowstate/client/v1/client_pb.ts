@@ -6,7 +6,7 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
 import { StateContext } from "../../v1/state_pb.js";
-import { AnyCommand } from "../../v1/commands_pb.js";
+import { Command } from "../../v1/commands_pb.js";
 
 /**
  * @generated from message flowstate.client.v1.ExecuteRequest
@@ -55,9 +55,9 @@ export class ExecuteResponse extends Message<ExecuteResponse> {
   stateContext?: StateContext;
 
   /**
-   * @generated from field: flowstate.v1.AnyCommand command = 2;
+   * @generated from field: flowstate.v1.Command command = 2;
    */
-  command?: AnyCommand;
+  command?: Command;
 
   constructor(data?: PartialMessage<ExecuteResponse>) {
     super();
@@ -68,7 +68,7 @@ export class ExecuteResponse extends Message<ExecuteResponse> {
   static readonly typeName = "flowstate.client.v1.ExecuteResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "state_context", kind: "message", T: StateContext },
-    { no: 2, name: "command", kind: "message", T: AnyCommand },
+    { no: 2, name: "command", kind: "message", T: Command },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExecuteResponse {

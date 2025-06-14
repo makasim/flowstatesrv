@@ -13,9 +13,8 @@ export const AnnotationDetails = ({ id, rev }: { id: string; rev: string }) => {
         data: [{ id, rev: BigInt(rev) }],
         commands: [
           {
-            command: {
-              case: "getData",
-              value: { dataRef: { id, rev: BigInt(rev) } },
+            getData: {
+              dataRef: { id, rev: BigInt(rev) }
             },
           },
         ],

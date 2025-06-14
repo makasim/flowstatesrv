@@ -15,7 +15,7 @@ import {
 } from "./components/ui/dialog";
 import { ApiContext } from "./ApiContext";
 import { AnnotationDetails } from "./AnnotationDetails";
-import { GetMany, AnyCommand } from "./gen/flowstate/v1/commands_pb";
+import { GetMany, Command } from "./gen/flowstate/v1/commands_pb";
 import { DoCommandRequest } from "./gen/flowstate/v1/server_pb";
 
 type StateData = {
@@ -46,7 +46,7 @@ const columns: ColumnDef<StateData>[] = [
       )),
   },
   {
-    accessorKey: "annotations",
+    accessorKey: "data",
     header: "Data",
     cell: ({ row }) =>
       Object.values(row.original.annotations)
@@ -153,11 +153,8 @@ export const StatesPage = () => {
         sinceRev: sinceRev,
       });
 
-      const anyCommand = new AnyCommand({
-        command: {
-          case: "getMany",
-          value: getManyCommand,
-        },
+      const anyCommand = new Command({
+        getMany: getManyCommand
       });
 
       const request = new DoCommandRequest({
@@ -166,12 +163,10 @@ export const StatesPage = () => {
 
       try {
         const response = await client.doCommand(request, { signal });
-        console.log(response);
-
         if (response.results.length > 0) {
           const result = response.results[0];
-          if (result.result.case === "getMany") {
-            const getManyResult = result.result.value;
+          if (result.getMany) {
+            const getManyResult = result.getMany;
             
             if (getManyResult.states.length > 0) {
               setStates(currentStates => {
