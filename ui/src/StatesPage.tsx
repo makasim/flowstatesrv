@@ -92,7 +92,7 @@ const columns: ColumnDef<StateData>[] = [
     accessorKey: "labels",
     header: "Labels",
     cell: ({ row }) =>
-      Object.entries(row.original.labels).map(([key, value]) => (
+      Object.entries(row.original.labels || {}).map(([key, value]) => (
         <div key={key} className="text-left">
           <Badge variant="outline">
             <span className="text-green-700">{key}:&nbsp;</span>
