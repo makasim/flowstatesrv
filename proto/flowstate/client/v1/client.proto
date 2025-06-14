@@ -11,7 +11,7 @@ message ExecuteRequest {
 
 message ExecuteResponse {
   flowstate.v1.StateContext state_context = 1;
-  flowstate.v1.AnyCommand command = 2;
+  flowstate.v1.Command command = 2;
 }
 
 service ClientService {

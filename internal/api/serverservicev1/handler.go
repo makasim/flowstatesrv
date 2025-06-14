@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"buf.build/go/protovalidate"
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
@@ -30,6 +31,10 @@ func New(e flowstate.Engine, fr flowRegistry) *Service {
 }
 
 func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommandRequest]) (*connect.Response[v1.DoCommandResponse], error) {
+	if err := protovalidate.Validate(req.Msg); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
 	stateCtxs := make([]*flowstate.StateCtx, 0, len(req.Msg.StateContexts))
 	for _, apiS := range req.Msg.StateContexts {
 		stateCtxs = append(stateCtxs, convertorv1.ConvertAPIToStateCtx(apiS))
@@ -67,7 +72,7 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	results := make([]*v1.AnyResult, 0, len(cmds))
+	results := make([]*v1.Result, 0, len(cmds))
 	for _, cmd := range cmds {
 		cmdRes, err := convertorv1.CommandToAPIResult(cmd)
 		if err != nil {

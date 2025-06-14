@@ -3,49 +3,49 @@ syntax = "proto3";
 package flowstate.v1;
 
 import "flowstate/v1/state.proto";
+import "buf/validate/validate.proto";
 
-message AnyCommand {
-  oneof command {
-    Transit transit = 1;
-    Pause pause = 2;
-    Resume resume = 3;
-    End end = 4;
-    Execute execute = 5;
-    Delay delay = 6;
-    Commit commit = 7;
-    Noop noop = 8;
-    Serialize serialize = 9;
-    Deserialize deserialize = 10;
-    StoreData store_data = 11;
-    GetData get_data = 12;
-    ReferenceData reference_data = 13;
-    DereferenceData dereference_data = 14;
-    Get get = 15;
-    CommitState commit_state = 16;
-    GetMany get_many = 17;
-  }
+message Command {
+  option (buf.validate.message).oneof = { fields: ["transit", "pause", "resume", "end", "execute", "delay", "commit", "noop", "serialize", "deserialize", "store_data", "get_data", "reference_data", "dereference_data", "get", "commit_state", "get_many"], required: true };
+  Transit transit = 1;
+  Pause pause = 2;
+  Resume resume = 3;
+  End end = 4;
+  Execute execute = 5;
+  Delay delay = 6;
+  Commit commit = 7;
+  Noop noop = 8;
+  Serialize serialize = 9;
+  Deserialize deserialize = 10;
+  StoreData store_data = 11;
+  GetData get_data = 12;
+  ReferenceData reference_data = 13;
+  DereferenceData dereference_data = 14;
+  Get get = 15;
+  CommitState commit_state = 16;
+  GetMany get_many = 17;
 }
 
-message AnyResult {
-  oneof result {
-    TransitResult transit = 1;
-    PauseResult pause = 2;
-    ResumeResult resume = 3;
-    EndResult end = 4;
-    ExecuteResult execute = 5;
-    DelayResult delay = 6;
-    CommitResult commit = 7;
-    NoopResult noop = 8;
-    SerializeResult serialize = 9;
-    DeserializeResult deserialize = 10;
-    StoreDataResult store_data = 11;
-    GetDataResult get_data = 12;
-    ReferenceDataResult reference_data = 13;
-    DereferenceDataResult dereference_data = 14;
-    GetResult get = 15;
-    CommitStateResult commit_state = 16;
-    GetManyResult get_many = 17;
-  }
+message Result {
+  option (buf.validate.message).oneof = { fields: ["transit", "pause", "resume", "end", "execute", "delay", "commit", "noop", "serialize", "deserialize", "store_data", "get_data", "reference_data", "dereference_data", "get", "commit_state", "get_many"], required: true };
+
+  TransitResult transit = 1;
+  PauseResult pause = 2;
+  ResumeResult resume = 3;
+  EndResult end = 4;
+  ExecuteResult execute = 5;
+  DelayResult delay = 6;
+  CommitResult commit = 7;
+  NoopResult noop = 8;
+  SerializeResult serialize = 9;
+  DeserializeResult deserialize = 10;
+  StoreDataResult store_data = 11;
+  GetDataResult get_data = 12;
+  ReferenceDataResult reference_data = 13;
+  DereferenceDataResult dereference_data = 14;
+  GetResult get = 15;
+  CommitStateResult commit_state = 16;
+  GetManyResult get_many = 17;
 }
 
 message Transit {
@@ -103,11 +103,11 @@ message DelayResult {
 }
 
 message Commit {
-  repeated AnyCommand commands = 2;
+  repeated Command commands = 2;
 }
 
 message CommitResult {
-  repeated AnyResult results = 3;
+  repeated Result results = 3;
 }
 
 message CommitState {
