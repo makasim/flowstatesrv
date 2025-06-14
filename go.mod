@@ -7,7 +7,7 @@ require (
 	buf.build/go/protovalidate v0.13.1
 	connectrpc.com/connect v1.18.1
 	github.com/bufbuild/httplb v0.4.1
-	github.com/makasim/flowstate v0.0.0-20250529190516-35679eabd016
+	github.com/makasim/flowstate v0.0.0-20250614074318-a160fdcced76
 	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.41.0
 	google.golang.org/protobuf v1.36.6
@@ -32,5 +32,3 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240826202546-f6391c0de4c7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate
