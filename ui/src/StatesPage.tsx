@@ -36,7 +36,7 @@ const columns: ColumnDef<StateData>[] = [
     accessorKey: "annotations",
     header: "Annotations",
     cell: ({ row }) =>
-      Object.entries(row.original.annotations).map(([key, value]) => (
+      Object.entries(row.original.annotations || {}).map(([key, value]) => (
         <div key={key} className="text-left">
           <Badge variant="outline">
             <span className="text-green-700">{key}:&nbsp;</span>
@@ -49,7 +49,7 @@ const columns: ColumnDef<StateData>[] = [
     accessorKey: "data",
     header: "Data",
     cell: ({ row }) =>
-      Object.values(row.original.annotations)
+      Object.values(row.original.annotations || {})
         .filter((x) => x.startsWith("data:"))
         .map((x) => x.slice(5).split(":"))
         .map(([id, rev]) => (
