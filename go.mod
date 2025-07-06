@@ -1,13 +1,14 @@
 module github.com/makasim/flowstatesrv
 
-go 1.24
+go 1.24.0
+
+toolchain go1.24.3
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250613105001-9f2d3c737feb.1
 	buf.build/go/protovalidate v0.13.1
 	connectrpc.com/connect v1.18.1
-	github.com/bufbuild/httplb v0.4.1
-	github.com/makasim/flowstate v0.0.0-20250614074318-a160fdcced76
+	github.com/makasim/flowstate v0.0.0-20250710184206-08a26db8c5df
 	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.41.0
 	google.golang.org/protobuf v1.36.6
@@ -25,10 +26,11 @@ require (
 	github.com/thejerf/slogassert v0.3.4 // indirect
 	go.uber.org/goleak v1.3.0 // indirect
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8 // indirect
-	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240826202546-f6391c0de4c7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240826202546-f6391c0de4c7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+//replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate

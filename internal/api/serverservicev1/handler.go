@@ -10,23 +10,19 @@ import (
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
 	"github.com/makasim/flowstatesrv/internal/remotecallflow"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/client/v1/clientv1connect"
 	v1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 )
 
-type flowRegistry interface {
-	SetFlow(id flowstate.FlowID, f flowstate.Flow)
-}
-
 type Service struct {
-	e  flowstate.Engine
-	fr flowRegistry
+	e flowstate.Engine
+	d flowstate.Driver
 }
 
-func New(e flowstate.Engine, fr flowRegistry) *Service {
+func New(e flowstate.Engine, d flowstate.Driver) *Service {
 	return &Service{
-		e:  e,
-		fr: fr,
+		e: e,
+		d: d,
 	}
 }
 
@@ -53,8 +49,8 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 		cmds = append(cmds, cmd)
 	}
 
-	revMismatchErr := &flowstate.ErrRevMismatch{}
-	if err := s.e.Do(cmds...); errors.As(err, revMismatchErr) {
+	err := s.e.Do(cmds...)
+	if revMismatchErr := (&flowstate.ErrRevMismatch{}); errors.As(err, revMismatchErr) {
 		apiRevMismatchErr := &v1.ErrorRevMismatch{}
 		for _, stateID := range revMismatchErr.TaskIDs() {
 			apiRevMismatchErr.CommittableStateIds = append(apiRevMismatchErr.CommittableStateIds, string(stateID))
@@ -68,6 +64,8 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 		connErr.AddDetail(ed)
 
 		return nil, connErr
+	} else if errors.Is(err, flowstate.ErrNotFound) {
+		return nil, connect.NewError(connect.CodeNotFound, err)
 	} else if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -90,12 +88,14 @@ func (s *Service) DoCommand(_ context.Context, req *connect.Request[v1.DoCommand
 }
 
 func (s *Service) RegisterFlow(_ context.Context, req *connect.Request[v1.RegisterFlowRequest]) (*connect.Response[v1.RegisterFlowResponse], error) {
-	fc := clientv1connect.NewClientServiceClient(http.DefaultClient, req.Msg.HttpHost)
+	fc := flowstatev1connect.NewFlowServiceClient(http.DefaultClient, req.Msg.HttpHost)
 
-	s.fr.SetFlow(
+	if err := s.d.SetFlow(
 		flowstate.FlowID(req.Msg.FlowId),
 		remotecallflow.New(fc),
-	)
+	); err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
 
 	return connect.NewResponse(&v1.RegisterFlowResponse{}), nil
 }
