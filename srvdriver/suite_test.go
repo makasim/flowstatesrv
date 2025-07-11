@@ -41,7 +41,9 @@ func TestSuite(t *testing.T) {
 func startSrv(t *testing.T) func() {
 	ctx, cancelCtx := context.WithCancel(context.Background())
 
-	cfg := app.Config{}
+	cfg := app.Config{
+		Driver: "memdriver",
+	}
 
 	runResCh := make(chan error, 1)
 	go func() {

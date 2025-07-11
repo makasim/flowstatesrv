@@ -10,8 +10,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/dgraph-io/badger/v4"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/makasim/flowstate"
+	"github.com/makasim/flowstate/badgerdriver"
 	"github.com/makasim/flowstate/memdriver"
+	"github.com/makasim/flowstate/pgdriver"
 	"github.com/makasim/flowstatesrv/internal/api/corsmiddleware"
 	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
@@ -20,7 +24,19 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
+type BadgerDriverConfig struct {
+	InMemory bool
+	Path     string
+}
+
+type PostgresDriverConfig struct {
+	ConnString string
+}
+
 type Config struct {
+	Driver         string
+	BadgerDriver   BadgerDriverConfig
+	PostgresDriver PostgresDriverConfig
 }
 
 type App struct {
@@ -36,7 +52,39 @@ func New(cfg Config) *App {
 }
 
 func (a *App) Run(ctx context.Context) error {
-	d := memdriver.New(a.l)
+	var d flowstate.Driver
+	switch a.cfg.Driver {
+	case "memdriver":
+		d = memdriver.New(a.l)
+	case "badgerdriver":
+		badgerCfg := badger.DefaultOptions(a.cfg.BadgerDriver.Path).
+			WithInMemory(a.cfg.BadgerDriver.InMemory).
+			WithLoggingLevel(2)
+		db, err := badger.Open(badgerCfg)
+		if err != nil {
+			return fmt.Errorf("badger: open: %w", err)
+		}
+		defer db.Close()
+
+		d0, err := badgerdriver.New(db)
+		if err != nil {
+			return fmt.Errorf("badgerdriver: new: %w", err)
+		}
+		defer d0.Shutdown(context.Background())
+
+		d = d0
+	case "pgdriver":
+		conn, err := pgxpool.New(context.Background(), a.cfg.PostgresDriver.ConnString)
+		if err != nil {
+			return fmt.Errorf("pgxpool: new: %w", err)
+		}
+		defer conn.Close()
+
+		d = pgdriver.New(conn, a.l)
+	default:
+		return fmt.Errorf("unknown driver: %s; support: memdriver, badgerdriver", a.cfg.Driver)
+	}
+
 	e, err := flowstate.NewEngine(d, a.l)
 	if err != nil {
 		return fmt.Errorf("new engine: %w", err)
