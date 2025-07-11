@@ -82,19 +82,29 @@ export class Command extends Message<Command> {
   dereferenceData?: DereferenceData;
 
   /**
-   * @generated from field: flowstate.v1.Get get = 15;
+   * @generated from field: flowstate.v1.GetStateByID get_state_by_id = 15;
    */
-  get?: Get;
+  getStateById?: GetStateByID;
 
   /**
-   * @generated from field: flowstate.v1.CommitState commit_state = 16;
+   * @generated from field: flowstate.v1.GetStateByLabels get_state_by_labels = 16;
+   */
+  getStateByLabels?: GetStateByLabels;
+
+  /**
+   * @generated from field: flowstate.v1.GetStates get_states = 17;
+   */
+  getStates?: GetStates;
+
+  /**
+   * @generated from field: flowstate.v1.GetDelayedStates get_delayed_states = 18;
+   */
+  getDelayedStates?: GetDelayedStates;
+
+  /**
+   * @generated from field: flowstate.v1.CommitState commit_state = 19;
    */
   commitState?: CommitState;
-
-  /**
-   * @generated from field: flowstate.v1.GetMany get_many = 17;
-   */
-  getMany?: GetMany;
 
   constructor(data?: PartialMessage<Command>) {
     super();
@@ -118,9 +128,11 @@ export class Command extends Message<Command> {
     { no: 12, name: "get_data", kind: "message", T: GetData },
     { no: 13, name: "reference_data", kind: "message", T: ReferenceData },
     { no: 14, name: "dereference_data", kind: "message", T: DereferenceData },
-    { no: 15, name: "get", kind: "message", T: Get },
-    { no: 16, name: "commit_state", kind: "message", T: CommitState },
-    { no: 17, name: "get_many", kind: "message", T: GetMany },
+    { no: 15, name: "get_state_by_id", kind: "message", T: GetStateByID },
+    { no: 16, name: "get_state_by_labels", kind: "message", T: GetStateByLabels },
+    { no: 17, name: "get_states", kind: "message", T: GetStates },
+    { no: 18, name: "get_delayed_states", kind: "message", T: GetDelayedStates },
+    { no: 19, name: "commit_state", kind: "message", T: CommitState },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Command {
@@ -215,19 +227,29 @@ export class Result extends Message<Result> {
   dereferenceData?: DereferenceDataResult;
 
   /**
-   * @generated from field: flowstate.v1.GetResult get = 15;
+   * @generated from field: flowstate.v1.GetStateByIDResult get_state_by_id = 15;
    */
-  get?: GetResult;
+  getStateById?: GetStateByIDResult;
 
   /**
-   * @generated from field: flowstate.v1.CommitStateResult commit_state = 16;
+   * @generated from field: flowstate.v1.GetStateByLabelsResult get_state_by_labels = 16;
+   */
+  getStateByLabels?: GetStateByLabelsResult;
+
+  /**
+   * @generated from field: flowstate.v1.GetStatesResult get_states = 17;
+   */
+  getStates?: GetStatesResult;
+
+  /**
+   * @generated from field: flowstate.v1.GetDelayedStatesResult get_delayed_states = 18;
+   */
+  getDelayedStates?: GetDelayedStatesResult;
+
+  /**
+   * @generated from field: flowstate.v1.CommitStateResult commit_state = 19;
    */
   commitState?: CommitStateResult;
-
-  /**
-   * @generated from field: flowstate.v1.GetManyResult get_many = 17;
-   */
-  getMany?: GetManyResult;
 
   constructor(data?: PartialMessage<Result>) {
     super();
@@ -251,9 +273,11 @@ export class Result extends Message<Result> {
     { no: 12, name: "get_data", kind: "message", T: GetDataResult },
     { no: 13, name: "reference_data", kind: "message", T: ReferenceDataResult },
     { no: 14, name: "dereference_data", kind: "message", T: DereferenceDataResult },
-    { no: 15, name: "get", kind: "message", T: GetResult },
-    { no: 16, name: "commit_state", kind: "message", T: CommitStateResult },
-    { no: 17, name: "get_many", kind: "message", T: GetManyResult },
+    { no: 15, name: "get_state_by_id", kind: "message", T: GetStateByIDResult },
+    { no: 16, name: "get_state_by_labels", kind: "message", T: GetStateByLabelsResult },
+    { no: 17, name: "get_states", kind: "message", T: GetStatesResult },
+    { no: 18, name: "get_delayed_states", kind: "message", T: GetDelayedStatesResult },
+    { no: 19, name: "commit_state", kind: "message", T: CommitStateResult },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Result {
@@ -665,9 +689,9 @@ export class Delay extends Message<Delay> {
   stateRef?: StateRef;
 
   /**
-   * @generated from field: string duration = 2;
+   * @generated from field: int64 execute_at_sec = 2;
    */
-  duration = "";
+  executeAtSec = protoInt64.zero;
 
   /**
    * @generated from field: bool commit = 3;
@@ -683,7 +707,7 @@ export class Delay extends Message<Delay> {
   static readonly typeName = "flowstate.v1.Delay";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "state_ref", kind: "message", T: StateRef },
-    { no: 2, name: "duration", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "execute_at_sec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 3, name: "commit", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
@@ -714,14 +738,9 @@ export class DelayResult extends Message<DelayResult> {
   stateRef?: StateRef;
 
   /**
-   * @generated from field: string duration = 2;
+   * @generated from field: flowstate.v1.State delaying_state = 2;
    */
-  duration = "";
-
-  /**
-   * @generated from field: bool commit = 3;
-   */
-  commit = false;
+  delayingState?: State;
 
   constructor(data?: PartialMessage<DelayResult>) {
     super();
@@ -732,8 +751,7 @@ export class DelayResult extends Message<DelayResult> {
   static readonly typeName = "flowstate.v1.DelayResult";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "state_ref", kind: "message", T: StateRef },
-    { no: 2, name: "duration", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "commit", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "delaying_state", kind: "message", T: State },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DelayResult {
@@ -1516,9 +1534,9 @@ export class StoreDataResult extends Message<StoreDataResult> {
 }
 
 /**
- * @generated from message flowstate.v1.Get
+ * @generated from message flowstate.v1.GetStateByID
  */
-export class Get extends Message<Get> {
+export class GetStateByID extends Message<GetStateByID> {
   /**
    * @generated from field: string id = 1;
    */
@@ -1530,6 +1548,82 @@ export class Get extends Message<Get> {
   rev = protoInt64.zero;
 
   /**
+   * @generated from field: flowstate.v1.StateRef state_ref = 4;
+   */
+  stateRef?: StateRef;
+
+  constructor(data?: PartialMessage<GetStateByID>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.GetStateByID";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: "state_ref", kind: "message", T: StateRef },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStateByID {
+    return new GetStateByID().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetStateByID {
+    return new GetStateByID().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetStateByID {
+    return new GetStateByID().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetStateByID | PlainMessage<GetStateByID> | undefined, b: GetStateByID | PlainMessage<GetStateByID> | undefined): boolean {
+    return proto3.util.equals(GetStateByID, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetStateByIDResult
+ */
+export class GetStateByIDResult extends Message<GetStateByIDResult> {
+  /**
+   * @generated from field: flowstate.v1.StateRef state_ref = 4;
+   */
+  stateRef?: StateRef;
+
+  constructor(data?: PartialMessage<GetStateByIDResult>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.GetStateByIDResult";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 4, name: "state_ref", kind: "message", T: StateRef },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStateByIDResult {
+    return new GetStateByIDResult().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetStateByIDResult {
+    return new GetStateByIDResult().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetStateByIDResult {
+    return new GetStateByIDResult().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetStateByIDResult | PlainMessage<GetStateByIDResult> | undefined, b: GetStateByIDResult | PlainMessage<GetStateByIDResult> | undefined): boolean {
+    return proto3.util.equals(GetStateByIDResult, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetStateByLabels
+ */
+export class GetStateByLabels extends Message<GetStateByLabels> {
+  /**
    * @generated from field: map<string, string> labels = 3;
    */
   labels: { [key: string]: string } = {};
@@ -1539,78 +1633,76 @@ export class Get extends Message<Get> {
    */
   stateRef?: StateRef;
 
-  constructor(data?: PartialMessage<Get>) {
+  constructor(data?: PartialMessage<GetStateByLabels>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.Get";
+  static readonly typeName = "flowstate.v1.GetStateByLabels";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 3, name: "labels", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
     { no: 4, name: "state_ref", kind: "message", T: StateRef },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Get {
-    return new Get().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStateByLabels {
+    return new GetStateByLabels().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Get {
-    return new Get().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetStateByLabels {
+    return new GetStateByLabels().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Get {
-    return new Get().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetStateByLabels {
+    return new GetStateByLabels().fromJsonString(jsonString, options);
   }
 
-  static equals(a: Get | PlainMessage<Get> | undefined, b: Get | PlainMessage<Get> | undefined): boolean {
-    return proto3.util.equals(Get, a, b);
+  static equals(a: GetStateByLabels | PlainMessage<GetStateByLabels> | undefined, b: GetStateByLabels | PlainMessage<GetStateByLabels> | undefined): boolean {
+    return proto3.util.equals(GetStateByLabels, a, b);
   }
 }
 
 /**
- * @generated from message flowstate.v1.GetResult
+ * @generated from message flowstate.v1.GetStateByLabelsResult
  */
-export class GetResult extends Message<GetResult> {
+export class GetStateByLabelsResult extends Message<GetStateByLabelsResult> {
   /**
    * @generated from field: flowstate.v1.StateRef state_ref = 4;
    */
   stateRef?: StateRef;
 
-  constructor(data?: PartialMessage<GetResult>) {
+  constructor(data?: PartialMessage<GetStateByLabelsResult>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.GetResult";
+  static readonly typeName = "flowstate.v1.GetStateByLabelsResult";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 4, name: "state_ref", kind: "message", T: StateRef },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetResult {
-    return new GetResult().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStateByLabelsResult {
+    return new GetStateByLabelsResult().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetResult {
-    return new GetResult().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetStateByLabelsResult {
+    return new GetStateByLabelsResult().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetResult {
-    return new GetResult().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetStateByLabelsResult {
+    return new GetStateByLabelsResult().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetResult | PlainMessage<GetResult> | undefined, b: GetResult | PlainMessage<GetResult> | undefined): boolean {
-    return proto3.util.equals(GetResult, a, b);
+  static equals(a: GetStateByLabelsResult | PlainMessage<GetStateByLabelsResult> | undefined, b: GetStateByLabelsResult | PlainMessage<GetStateByLabelsResult> | undefined): boolean {
+    return proto3.util.equals(GetStateByLabelsResult, a, b);
   }
 }
 
 /**
- * @generated from message flowstate.v1.GetMany
+ * @generated from message flowstate.v1.GetStates
  */
-export class GetMany extends Message<GetMany> {
+export class GetStates extends Message<GetStates> {
   /**
    * @generated from field: int64 since_rev = 1;
    */
@@ -1624,9 +1716,9 @@ export class GetMany extends Message<GetMany> {
   sinceTimeUsec = protoInt64.zero;
 
   /**
-   * @generated from field: repeated flowstate.v1.GetMany.Labels labels = 3;
+   * @generated from field: repeated flowstate.v1.GetStates.Labels labels = 3;
    */
-  labels: GetMany_Labels[] = [];
+  labels: GetStates_Labels[] = [];
 
   /**
    * @generated from field: bool latest_only = 4;
@@ -1638,79 +1730,128 @@ export class GetMany extends Message<GetMany> {
    */
   limit = protoInt64.zero;
 
-  constructor(data?: PartialMessage<GetMany>) {
+  constructor(data?: PartialMessage<GetStates>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.GetMany";
+  static readonly typeName = "flowstate.v1.GetStates";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "since_rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 2, name: "since_time_usec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 3, name: "labels", kind: "message", T: GetMany_Labels, repeated: true },
+    { no: 3, name: "labels", kind: "message", T: GetStates_Labels, repeated: true },
     { no: 4, name: "latest_only", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 5, name: "limit", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetMany {
-    return new GetMany().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStates {
+    return new GetStates().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetMany {
-    return new GetMany().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetStates {
+    return new GetStates().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetMany {
-    return new GetMany().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetStates {
+    return new GetStates().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetMany | PlainMessage<GetMany> | undefined, b: GetMany | PlainMessage<GetMany> | undefined): boolean {
-    return proto3.util.equals(GetMany, a, b);
+  static equals(a: GetStates | PlainMessage<GetStates> | undefined, b: GetStates | PlainMessage<GetStates> | undefined): boolean {
+    return proto3.util.equals(GetStates, a, b);
   }
 }
 
 /**
- * @generated from message flowstate.v1.GetMany.Labels
+ * @generated from message flowstate.v1.GetStates.Labels
  */
-export class GetMany_Labels extends Message<GetMany_Labels> {
+export class GetStates_Labels extends Message<GetStates_Labels> {
   /**
    * @generated from field: map<string, string> labels = 3;
    */
   labels: { [key: string]: string } = {};
 
-  constructor(data?: PartialMessage<GetMany_Labels>) {
+  constructor(data?: PartialMessage<GetStates_Labels>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.GetMany.Labels";
+  static readonly typeName = "flowstate.v1.GetStates.Labels";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 3, name: "labels", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetMany_Labels {
-    return new GetMany_Labels().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStates_Labels {
+    return new GetStates_Labels().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetMany_Labels {
-    return new GetMany_Labels().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetStates_Labels {
+    return new GetStates_Labels().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetMany_Labels {
-    return new GetMany_Labels().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetStates_Labels {
+    return new GetStates_Labels().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetMany_Labels | PlainMessage<GetMany_Labels> | undefined, b: GetMany_Labels | PlainMessage<GetMany_Labels> | undefined): boolean {
-    return proto3.util.equals(GetMany_Labels, a, b);
+  static equals(a: GetStates_Labels | PlainMessage<GetStates_Labels> | undefined, b: GetStates_Labels | PlainMessage<GetStates_Labels> | undefined): boolean {
+    return proto3.util.equals(GetStates_Labels, a, b);
   }
 }
 
 /**
- * @generated from message flowstate.v1.GetManyResult
+ * @generated from message flowstate.v1.DelayedState
  */
-export class GetManyResult extends Message<GetManyResult> {
+export class DelayedState extends Message<DelayedState> {
+  /**
+   * @generated from field: flowstate.v1.State state = 1;
+   */
+  state?: State;
+
+  /**
+   * @generated from field: int64 offset = 2;
+   */
+  offset = protoInt64.zero;
+
+  /**
+   * @generated from field: int64 execute_at_sec = 3;
+   */
+  executeAtSec = protoInt64.zero;
+
+  constructor(data?: PartialMessage<DelayedState>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.DelayedState";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "state", kind: "message", T: State },
+    { no: 2, name: "offset", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: "execute_at_sec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DelayedState {
+    return new DelayedState().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DelayedState {
+    return new DelayedState().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DelayedState {
+    return new DelayedState().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DelayedState | PlainMessage<DelayedState> | undefined, b: DelayedState | PlainMessage<DelayedState> | undefined): boolean {
+    return proto3.util.equals(DelayedState, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetStatesResult
+ */
+export class GetStatesResult extends Message<GetStatesResult> {
   /**
    * @generated from field: repeated flowstate.v1.State states = 1;
    */
@@ -1721,32 +1862,130 @@ export class GetManyResult extends Message<GetManyResult> {
    */
   more = false;
 
-  constructor(data?: PartialMessage<GetManyResult>) {
+  constructor(data?: PartialMessage<GetStatesResult>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.GetManyResult";
+  static readonly typeName = "flowstate.v1.GetStatesResult";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "states", kind: "message", T: State, repeated: true },
     { no: 2, name: "more", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetManyResult {
-    return new GetManyResult().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStatesResult {
+    return new GetStatesResult().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetManyResult {
-    return new GetManyResult().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetStatesResult {
+    return new GetStatesResult().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetManyResult {
-    return new GetManyResult().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetStatesResult {
+    return new GetStatesResult().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GetManyResult | PlainMessage<GetManyResult> | undefined, b: GetManyResult | PlainMessage<GetManyResult> | undefined): boolean {
-    return proto3.util.equals(GetManyResult, a, b);
+  static equals(a: GetStatesResult | PlainMessage<GetStatesResult> | undefined, b: GetStatesResult | PlainMessage<GetStatesResult> | undefined): boolean {
+    return proto3.util.equals(GetStatesResult, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetDelayedStates
+ */
+export class GetDelayedStates extends Message<GetDelayedStates> {
+  /**
+   * @generated from field: int64 since_time_sec = 1;
+   */
+  sinceTimeSec = protoInt64.zero;
+
+  /**
+   * @generated from field: int64 until_time_sec = 2;
+   */
+  untilTimeSec = protoInt64.zero;
+
+  /**
+   * @generated from field: int64 offset = 3;
+   */
+  offset = protoInt64.zero;
+
+  /**
+   * @generated from field: int64 limit = 4;
+   */
+  limit = protoInt64.zero;
+
+  constructor(data?: PartialMessage<GetDelayedStates>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.GetDelayedStates";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "since_time_sec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 2, name: "until_time_sec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 3, name: "offset", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 4, name: "limit", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetDelayedStates {
+    return new GetDelayedStates().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetDelayedStates {
+    return new GetDelayedStates().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetDelayedStates {
+    return new GetDelayedStates().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetDelayedStates | PlainMessage<GetDelayedStates> | undefined, b: GetDelayedStates | PlainMessage<GetDelayedStates> | undefined): boolean {
+    return proto3.util.equals(GetDelayedStates, a, b);
+  }
+}
+
+/**
+ * @generated from message flowstate.v1.GetDelayedStatesResult
+ */
+export class GetDelayedStatesResult extends Message<GetDelayedStatesResult> {
+  /**
+   * @generated from field: repeated flowstate.v1.DelayedState delayed_states = 1;
+   */
+  delayedStates: DelayedState[] = [];
+
+  /**
+   * @generated from field: bool more = 2;
+   */
+  more = false;
+
+  constructor(data?: PartialMessage<GetDelayedStatesResult>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "flowstate.v1.GetDelayedStatesResult";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "delayed_states", kind: "message", T: DelayedState, repeated: true },
+    { no: 2, name: "more", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetDelayedStatesResult {
+    return new GetDelayedStatesResult().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetDelayedStatesResult {
+    return new GetDelayedStatesResult().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetDelayedStatesResult {
+    return new GetDelayedStatesResult().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetDelayedStatesResult | PlainMessage<GetDelayedStatesResult> | undefined, b: GetDelayedStatesResult | PlainMessage<GetDelayedStatesResult> | undefined): boolean {
+    return proto3.util.equals(GetDelayedStatesResult, a, b);
   }
 }
 

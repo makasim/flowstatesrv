@@ -14,16 +14,27 @@ import (
 )
 
 func TestSuite(t *testing.T) {
-	s := testcases.Get(func(t testcases.TestingT) (flowstate.Doer, testcases.FlowRegistry) {
-		t1 := t.(*testing.T)
+	s := testcases.Get(func(t *testing.T) flowstate.Driver {
+		l, _ := testcases.NewTestLogger(t)
 
-		t.Cleanup(startSrv(t1))
+		t.Cleanup(startSrv(t))
 
-		d := srvdriver.New(`http://127.0.0.1:8080`)
+		d, err := srvdriver.New(`http://127.0.0.1:8080`, l)
+		t.Cleanup(func() {
+			if err := d.Shutdown(context.Background()); err != nil {
+				t.Fatalf("driver shutdown: %v", err)
+			}
+		})
 
-		return d, d
+		if err != nil {
+			t.Fatalf("srvdriver.New: %v", err)
+		}
+
+		return d
 	})
 
+	s.SetUpDelayer = false
+	//s.DisableGoleak()
 	s.Test(t)
 }
 

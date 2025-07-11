@@ -12,7 +12,6 @@ import (
 
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/memdriver"
-	"github.com/makasim/flowstate/recovery"
 	"github.com/makasim/flowstatesrv/internal/api/corsmiddleware"
 	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
 	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
@@ -37,15 +36,20 @@ func New(cfg Config) *App {
 }
 
 func (a *App) Run(ctx context.Context) error {
-	d := memdriver.New()
+	d := memdriver.New(a.l)
 	e, err := flowstate.NewEngine(d, a.l)
 	if err != nil {
 		return fmt.Errorf("new engine: %w", err)
 	}
 
-	r := recovery.New(e, a.l)
-	if err := r.Init(); err != nil {
-		return fmt.Errorf("recovery init: %w", err)
+	r, err := flowstate.NewRecoverer(e, a.l)
+	if err != nil {
+		return fmt.Errorf("recoverer: new: %w", err)
+	}
+
+	dlr, err := flowstate.NewDelayer(e, a.l)
+	if err != nil {
+		return fmt.Errorf("delayer: new: %w", err)
 	}
 
 	addr := `0:8080`
@@ -85,6 +89,10 @@ func (a *App) Run(ctx context.Context) error {
 
 	if err := r.Shutdown(shutdownCtx); err != nil {
 		shutdownRes = errors.Join(shutdownRes, fmt.Errorf("recovery: shutdown: %w", err))
+	}
+
+	if err := dlr.Shutdown(shutdownCtx); err != nil {
+		shutdownRes = errors.Join(shutdownRes, fmt.Errorf("delayer: shutdown: %w", err))
 	}
 
 	if err := e.Shutdown(shutdownCtx); err != nil {

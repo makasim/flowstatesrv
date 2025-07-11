@@ -6,18 +6,18 @@ import (
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
-	clientv1 "github.com/makasim/flowstatesrv/protogen/flowstate/client/v1"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/client/v1/clientv1connect"
+	clientv1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1"
+	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 )
 
 type Config struct {
 }
 
 type Flow struct {
-	fc clientv1connect.ClientServiceClient
+	fc flowstatev1connect.FlowServiceClient
 }
 
-func New(fc clientv1connect.ClientServiceClient) *Flow {
+func New(fc flowstatev1connect.FlowServiceClient) *Flow {
 	return &Flow{
 		fc: fc,
 	}

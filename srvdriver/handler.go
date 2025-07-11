@@ -7,20 +7,20 @@ import (
 	"connectrpc.com/connect"
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstatesrv/convertorv1"
-	clientv1 "github.com/makasim/flowstatesrv/protogen/flowstate/client/v1"
+	clientv1 "github.com/makasim/flowstatesrv/protogen/flowstate/v1"
 )
 
-type Handler struct {
+type handler struct {
 	e flowstate.Engine
 }
 
-func newHandler(e flowstate.Engine) *Handler {
-	return &Handler{
+func newHandler(e flowstate.Engine) *handler {
+	return &handler{
 		e: e,
 	}
 }
 
-func (h *Handler) Execute(_ context.Context, req *connect.Request[clientv1.ExecuteRequest]) (*connect.Response[clientv1.ExecuteResponse], error) {
+func (h *handler) Execute(_ context.Context, req *connect.Request[clientv1.ExecuteRequest]) (*connect.Response[clientv1.ExecuteResponse], error) {
 	stateCtx := convertorv1.ConvertAPIToStateCtx(req.Msg.StateContext)
 	resStateCtx := stateCtx.CopyTo(&flowstate.StateCtx{})
 	go func() {

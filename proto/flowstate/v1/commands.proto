@@ -6,7 +6,7 @@ import "flowstate/v1/state.proto";
 import "buf/validate/validate.proto";
 
 message Command {
-  option (buf.validate.message).oneof = { fields: ["transit", "pause", "resume", "end", "execute", "delay", "commit", "noop", "serialize", "deserialize", "store_data", "get_data", "reference_data", "dereference_data", "get", "commit_state", "get_many"], required: true };
+  option (buf.validate.message).oneof = { fields: ["transit", "pause", "resume", "end", "execute", "delay", "commit", "noop", "serialize", "deserialize", "store_data", "get_data", "reference_data", "dereference_data", "get_state_by_id", "get_state_by_labels", "commit_state", "get_states", "get_delayed_states"], required: true };
   Transit transit = 1;
   Pause pause = 2;
   Resume resume = 3;
@@ -21,13 +21,15 @@ message Command {
   GetData get_data = 12;
   ReferenceData reference_data = 13;
   DereferenceData dereference_data = 14;
-  Get get = 15;
-  CommitState commit_state = 16;
-  GetMany get_many = 17;
+  GetStateByID get_state_by_id = 15;
+  GetStateByLabels get_state_by_labels = 16;
+  GetStates get_states = 17;
+  GetDelayedStates get_delayed_states = 18;
+  CommitState commit_state = 19;
 }
 
 message Result {
-  option (buf.validate.message).oneof = { fields: ["transit", "pause", "resume", "end", "execute", "delay", "commit", "noop", "serialize", "deserialize", "store_data", "get_data", "reference_data", "dereference_data", "get", "commit_state", "get_many"], required: true };
+  option (buf.validate.message).oneof = { fields: ["transit", "pause", "resume", "end", "execute", "delay", "commit", "noop", "serialize", "deserialize", "store_data", "get_data", "reference_data", "dereference_data", "get_state_by_id", "get_state_by_labels", "commit_state", "get_states", "get_delayed_states"], required: true };
 
   TransitResult transit = 1;
   PauseResult pause = 2;
@@ -43,9 +45,11 @@ message Result {
   GetDataResult get_data = 12;
   ReferenceDataResult reference_data = 13;
   DereferenceDataResult dereference_data = 14;
-  GetResult get = 15;
-  CommitStateResult commit_state = 16;
-  GetManyResult get_many = 17;
+  GetStateByIDResult get_state_by_id = 15;
+  GetStateByLabelsResult get_state_by_labels = 16;
+  GetStatesResult get_states = 17;
+  GetDelayedStatesResult get_delayed_states = 18;
+  CommitStateResult commit_state = 19;
 }
 
 message Transit {
@@ -92,14 +96,13 @@ message ExecuteResult {
 
 message Delay {
   StateRef state_ref = 1;
-  string duration = 2;
+  int64 execute_at_sec = 2;
   bool commit = 3;
 }
 
 message DelayResult {
   StateRef state_ref = 1;
-  string duration = 2;
-  bool commit = 3;
+  State delaying_state = 2;
 }
 
 message Commit {
@@ -190,19 +193,28 @@ message StoreDataResult {
   DataRef data_ref = 1;
 }
 
-message Get {
+message GetStateByID {
   string id = 1;
   int64 rev = 2;
+
+  StateRef state_ref = 4;
+}
+
+message GetStateByIDResult {
+  StateRef state_ref = 4;
+}
+
+message GetStateByLabels {
   map<string, string> labels = 3;
 
   StateRef state_ref = 4;
 }
 
-message GetResult {
+message GetStateByLabelsResult {
   StateRef state_ref = 4;
 }
 
-message GetMany {
+message GetStates {
   message Labels {
     map<string, string> labels = 3;
   }
@@ -214,7 +226,25 @@ message GetMany {
   int64 limit = 5;
 }
 
-message GetManyResult {
+message DelayedState {
+  State state = 1;
+  int64 offset = 2;
+  int64 execute_at_sec = 3;
+}
+
+message GetStatesResult {
   repeated State states = 1;
+  bool more = 2;
+}
+
+message GetDelayedStates {
+  int64 since_time_sec = 1;
+  int64 until_time_sec = 2;
+  int64 offset = 3;
+  int64 limit = 4;
+}
+
+message GetDelayedStatesResult {
+  repeated DelayedState delayed_states = 1;
   bool more = 2;
 }
