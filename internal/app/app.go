@@ -55,8 +55,11 @@ func (a *App) Run(ctx context.Context) error {
 	var d flowstate.Driver
 	switch a.cfg.Driver {
 	case "memdriver":
+		a.l.Info("init memdriver")
 		d = memdriver.New(a.l)
 	case "badgerdriver":
+		a.l.Info("init badgerdriver")
+
 		badgerCfg := badger.DefaultOptions(a.cfg.BadgerDriver.Path).
 			WithInMemory(a.cfg.BadgerDriver.InMemory).
 			WithLoggingLevel(2)
@@ -74,6 +77,7 @@ func (a *App) Run(ctx context.Context) error {
 
 		d = d0
 	case "pgdriver":
+		a.l.Info("init pgdriver")
 		conn, err := pgxpool.New(context.Background(), a.cfg.PostgresDriver.ConnString)
 		if err != nil {
 			return fmt.Errorf("pgxpool: new: %w", err)

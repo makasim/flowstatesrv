@@ -17,6 +17,9 @@ func main() {
 
 	cfg := app.Config{
 		Driver: "memdriver",
+		BadgerDriver: app.BadgerDriverConfig{
+			Path: "badgerdb",
+		},
 	}
 	if os.Getenv("FLOWSTATESRV_DRIVER") != "" {
 		cfg.Driver = os.Getenv("FLOWSTATESRV_DRIVER")
