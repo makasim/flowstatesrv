@@ -15,7 +15,7 @@ import {
 } from "./components/ui/dialog";
 import { ApiContext } from "./ApiContext";
 import { AnnotationDetails } from "./AnnotationDetails";
-import { GetMany, Command } from "./gen/flowstate/v1/commands_pb";
+import { GetStates, Command } from "./gen/flowstate/v1/commands_pb";
 import { DoCommandRequest } from "./gen/flowstate/v1/server_pb";
 
 type StateData = {
@@ -147,14 +147,14 @@ export const StatesPage = () => {
     const pollStates = async () => {
       if (signal.aborted) return;
 
-      const getManyCommand = new GetMany({
+      const getStatesCommand = new GetStates({
         limit: BigInt(100),
         latestOnly: false,
         sinceRev: sinceRev,
       });
 
       const anyCommand = new Command({
-        getMany: getManyCommand
+        getStates: getStatesCommand
       });
 
       const request = new DoCommandRequest({
@@ -165,16 +165,16 @@ export const StatesPage = () => {
         const response = await client.doCommand(request, { signal });
         if (response.results.length > 0) {
           const result = response.results[0];
-          if (result.getMany) {
-            const getManyResult = result.getMany;
+          if (result.getStates) {
+            const getStatesResult = result.getStates;
             
-            if (getManyResult.states.length > 0) {
+            if (getStatesResult.states.length > 0) {
               setStates(currentStates => {
-                const newStates = [...currentStates, ...getManyResult.states];
+                const newStates = [...currentStates, ...getStatesResult.states];
                 return newStates.sort((a, b) => Number(b.rev - a.rev));
               });
               
-              const maxRev = getManyResult.states.reduce((max, state) => 
+              const maxRev = getStatesResult.states.reduce((max, state) =>
                 state.rev > max ? state.rev : max, sinceRev);
               sinceRev = maxRev;
             }
