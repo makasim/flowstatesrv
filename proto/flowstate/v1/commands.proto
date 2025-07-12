@@ -226,12 +226,6 @@ message GetStates {
   int64 limit = 5;
 }
 
-message DelayedState {
-  State state = 1;
-  int64 offset = 2;
-  int64 execute_at_sec = 3;
-}
-
 message GetStatesResult {
   repeated State states = 1;
   bool more = 2;
