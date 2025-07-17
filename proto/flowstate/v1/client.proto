@@ -2,15 +2,14 @@ syntax = "proto3";
 
 package flowstate.v1;
 
-import "flowstate/v1/state.proto";
-import "flowstate/v1/commands.proto";
+import "flowstate/v1/messages.proto";
 
 message ExecuteRequest {
-  flowstate.v1.StateContext state_context = 1;
+  flowstate.v1.StateCtx state_context = 1;
 }
 
 message ExecuteResponse {
-  flowstate.v1.StateContext state_context = 1;
+  flowstate.v1.StateCtx state_context = 1;
   flowstate.v1.Command command = 2;
 }
 

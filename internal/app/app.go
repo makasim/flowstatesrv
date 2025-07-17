@@ -15,10 +15,8 @@ import (
 	"github.com/makasim/flowstate"
 	"github.com/makasim/flowstate/badgerdriver"
 	"github.com/makasim/flowstate/memdriver"
+	"github.com/makasim/flowstate/netdriver"
 	"github.com/makasim/flowstate/pgdriver"
-	"github.com/makasim/flowstatesrv/internal/api/corsmiddleware"
-	"github.com/makasim/flowstatesrv/internal/api/serverservicev1"
-	"github.com/makasim/flowstatesrv/protogen/flowstate/v1/flowstatev1connect"
 	"github.com/makasim/flowstatesrv/ui"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -109,18 +107,21 @@ func (a *App) Run(ctx context.Context) error {
 		addr = os.Getenv(`FLOWSTATESRV_ADDR`)
 	}
 
-	corsMW := corsmiddleware.New(os.Getenv(`CORS_ENABLED`) == `true`)
-
-	mux := http.NewServeMux()
-
-	mux.Handle(corsMW.WrapPath(flowstatev1connect.NewServerServiceHandler(serverservicev1.New(e, d))))
-
-	mux.Handle("/", corsMW.Wrap(http.FileServerFS(ui.PublicFS())))
+	uiH := http.FileServerFS(ui.PublicFS())
 
 	a.l.Info("http server starting", "addr", addr)
 	srv := &http.Server{
-		Addr:    addr,
-		Handler: h2c.NewHandler(mux, &http2.Server{}),
+		Addr: addr,
+		Handler: h2c.NewHandler(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+			if handleCORS(rw, r) {
+				return
+			}
+			if netdriver.HandleAll(rw, r, d) {
+				return
+			}
+
+			uiH.ServeHTTP(rw, r)
+		}), &http2.Server{}),
 	}
 
 	go func() {

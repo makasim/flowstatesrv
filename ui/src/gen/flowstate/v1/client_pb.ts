@@ -5,17 +5,16 @@
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3 } from "@bufbuild/protobuf";
-import { StateContext } from "./state_pb.js";
-import { Command } from "./commands_pb.js";
+import { Command, StateCtx } from "./messages_pb.js";
 
 /**
  * @generated from message flowstate.v1.ExecuteRequest
  */
 export class ExecuteRequest extends Message<ExecuteRequest> {
   /**
-   * @generated from field: flowstate.v1.StateContext state_context = 1;
+   * @generated from field: flowstate.v1.StateCtx state_context = 1;
    */
-  stateContext?: StateContext;
+  stateContext?: StateCtx;
 
   constructor(data?: PartialMessage<ExecuteRequest>) {
     super();
@@ -25,7 +24,7 @@ export class ExecuteRequest extends Message<ExecuteRequest> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.ExecuteRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_context", kind: "message", T: StateContext },
+    { no: 1, name: "state_context", kind: "message", T: StateCtx },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExecuteRequest {
@@ -50,9 +49,9 @@ export class ExecuteRequest extends Message<ExecuteRequest> {
  */
 export class ExecuteResponse extends Message<ExecuteResponse> {
   /**
-   * @generated from field: flowstate.v1.StateContext state_context = 1;
+   * @generated from field: flowstate.v1.StateCtx state_context = 1;
    */
-  stateContext?: StateContext;
+  stateContext?: StateCtx;
 
   /**
    * @generated from field: flowstate.v1.Command command = 2;
@@ -67,7 +66,7 @@ export class ExecuteResponse extends Message<ExecuteResponse> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.ExecuteResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_context", kind: "message", T: StateContext },
+    { no: 1, name: "state_context", kind: "message", T: StateCtx },
     { no: 2, name: "command", kind: "message", T: Command },
   ]);
 

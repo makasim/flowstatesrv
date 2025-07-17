@@ -10,7 +10,7 @@ require (
 	connectrpc.com/connect v1.18.1
 	github.com/dgraph-io/badger/v4 v4.7.0
 	github.com/jackc/pgx/v5 v5.6.0
-	github.com/makasim/flowstate v0.0.0-20250711184731-227a3959da21
+	github.com/makasim/flowstate v0.0.0-20250717152414-ad7a3e62ab4e
 	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.41.0
 	google.golang.org/protobuf v1.36.6
@@ -18,6 +18,7 @@ require (
 
 require (
 	cel.dev/expr v0.23.1 // indirect
+	github.com/VictoriaMetrics/easyproto v0.1.4 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -32,6 +33,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect

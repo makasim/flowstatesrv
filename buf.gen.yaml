@@ -12,13 +12,13 @@ managed:
 
 
 plugins:
-  - local: protoc-gen-go
-    out: protogen
-    opt: paths=source_relative
-  - local: protoc-gen-connect-go
-    out: protogen
-    opt: paths=source_relative
-  - remote: buf.build/connectrpc/es:v1.4.0
+#  - local: protoc-gen-go
+#    out: protogen
+#    opt: paths=source_relative
+#  - local: protoc-gen-connect-go
+#    out: protogen
+#    opt: paths=source_relative
+  - remote: buf.build/connectrpc/es:v1.6.1
     out: ui/src/gen
     opt: target=ts
   - remote: buf.build/bufbuild/es:v1.10.0
