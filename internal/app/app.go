@@ -120,10 +120,7 @@ func (a *App) Run(ctx context.Context) error {
 	a.l.Info("http server starting", "addr", addr)
 	srv := &http.Server{
 		Addr: addr,
-		Handler: h2c.NewHandler(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-			if handleCORS(rw, r) {
-				return
-			}
+		Handler: h2c.NewHandler(handleCORS(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			if netdriver.HandleAll(rw, r, d, a.l) {
 				return
 			}
@@ -132,7 +129,7 @@ func (a *App) Run(ctx context.Context) error {
 			}
 
 			uiH.ServeHTTP(rw, r)
-		}), &http2.Server{}),
+		})), &http2.Server{}),
 	}
 
 	go func() {

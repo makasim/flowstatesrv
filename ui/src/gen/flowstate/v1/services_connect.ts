@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { Command, GetDelayedStatesResult, GetStatesResult, StateCtx } from "./messages_pb.js";
+import { Command, StateCtx } from "./messages_pb.js";
 import { MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -45,7 +45,7 @@ export const Driver = {
     getStates: {
       name: "GetStates",
       I: Command,
-      O: GetStatesResult,
+      O: Command,
       kind: MethodKind.Unary,
     },
     /**
@@ -54,7 +54,7 @@ export const Driver = {
     getDelayedStates: {
       name: "GetDelayedStates",
       I: Command,
-      O: GetDelayedStatesResult,
+      O: Command,
       kind: MethodKind.Unary,
     },
     /**

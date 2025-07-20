@@ -5,14 +5,14 @@ import { Input } from "./components/ui/input";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { StatesPage } from "./StatesPage";
 import { ApiContext } from "./ApiContext";
-import { createApiClient } from "./api";
+import { createDriverClient } from "./api";
 
 export default function App() {
   const [apiURL, setApiURL] = useState("");
   const [servers, setServers] = useLocalStorage<string[]>("servers", []);
   const [choosenServer, setChoosenServer] = useState(servers[0] || "");
 
-  const client = useMemo(() => apiURL ? createApiClient(apiURL) : null, [apiURL]);
+  const client = useMemo(() => apiURL ? createDriverClient(apiURL) : null, [apiURL]);
 
   if (client) {
     return (

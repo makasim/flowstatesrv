@@ -1,32 +1,30 @@
 import { useContext, useEffect, useState } from "react";
 import { ApiContext } from "./ApiContext";
-import { DoCommandResponse } from "./gen/flowstate/v1/server_pb";
+import { Command, GetDataCommand, Data, DataRef } from "./gen/flowstate/v1/messages_pb";
 
 export const AnnotationDetails = ({ id, rev }: { id: string; rev: string }) => {
-  const [info, setInfo] = useState<DoCommandResponse | null>(null);
+  const [info, setInfo] = useState<Command | null>(null);
   const client = useContext(ApiContext);
 
   useEffect(() => {
     if (!client) return;
-    client
-      .doCommand({
-        data: [{ id, rev: BigInt(rev) }],
-        commands: [
-          {
-            getData: {
-              dataRef: { id, rev: BigInt(rev) }
-            },
-          },
-        ],
+    const command = new Command({
+      datas: [
+        new Data({ id, rev: BigInt(rev) })
+      ],
+      getData: new GetDataCommand({
+        dataRef: new DataRef({ id, rev: BigInt(rev) })
       })
-      .then(setInfo);
+    });
+    
+    client.do(command).then(setInfo);
   }, [client]);
 
   if (!info) return "Loading...";
 
   return (
     <>
-      {info.data.map((d) => {
+      {info.datas.map((d) => {
         if (d.binary) return <span>{d.b}</span>;
 
         try {

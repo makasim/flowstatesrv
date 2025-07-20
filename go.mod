@@ -38,4 +38,4 @@ require (
 	golang.org/x/time v0.6.0 // indirect
 )
 
-// replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate
+replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate
