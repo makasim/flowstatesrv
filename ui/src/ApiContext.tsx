@@ -1,4 +1,4 @@
 import { createContext } from "react";
-import { ApiClient } from "./api";
+import { DriverClient } from "./api";
 
-export const ApiContext = createContext<ApiClient | null>(null);
+export const ApiContext = createContext<DriverClient | null>(null);

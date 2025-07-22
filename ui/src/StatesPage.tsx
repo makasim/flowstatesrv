@@ -1,10 +1,10 @@
 import "./App.css";
 import { DataTable } from "./components/data-table";
 import React, { useEffect, useState } from "react";
-import { State } from "./gen/flowstate/v1/state_pb";
+import { State } from "./gen/flowstate/v1/messages_pb";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { createApiClient } from "./api";
+import { createDriverClient } from "./api";
 import { Badge } from "./components/ui/badge";
 import {
   Dialog,
@@ -15,8 +15,7 @@ import {
 } from "./components/ui/dialog";
 import { ApiContext } from "./ApiContext";
 import { AnnotationDetails } from "./AnnotationDetails";
-import { GetStates, Command } from "./gen/flowstate/v1/commands_pb";
-import { DoCommandRequest } from "./gen/flowstate/v1/server_pb";
+import { GetStatesCommand, Command } from "./gen/flowstate/v1/messages_pb";
 
 type StateData = {
   id: string;
@@ -49,11 +48,15 @@ const columns: ColumnDef<StateData>[] = [
     accessorKey: "data",
     header: "Data",
     cell: ({ row }) =>
-      Object.values(row.original.annotations || {})
-        .filter((x) => x.startsWith("data:"))
-        .map((x) => x.slice(5).split(":"))
-        .map(([id, rev]) => (
-          <Dialog modal key={`${id}:${rev}`}>
+      Object.entries(row.original.annotations || {})
+        .filter(([key]) => key.startsWith("flowstate.data."))
+        .map(([key, value]) => {
+          const alias = key.slice(15); // Remove "flowstate.data." prefix
+          const [dataId, dataRev] = value.split(":");
+          return [alias, dataId, dataRev];
+        })
+        .map(([alias, dataId, dataRev]) => (
+          <Dialog modal key={`${dataId}:${dataRev}`}>
             <DialogTrigger className="text-slate">
               <svg
                 className="w-6 h-6 text-white"
@@ -79,10 +82,10 @@ const columns: ColumnDef<StateData>[] = [
 
             <DialogContent>
               <DialogTitle className="pb-4 sticky top-0 bg-background">
-                {id}:{rev}
+                flowstate.data.{alias}: "{dataId}:{dataRev}"
               </DialogTitle>
               <DialogDescription>
-                <AnnotationDetails id={id} rev={rev} />
+                <AnnotationDetails alias={alias} state={row.original.state} />
               </DialogDescription>
             </DialogContent>
           </Dialog>
@@ -120,7 +123,7 @@ const columns: ColumnDef<StateData>[] = [
   },
 ];
 
-type ApiClient = ReturnType<typeof createApiClient>;
+type DriverClient = ReturnType<typeof createDriverClient>;
 
 export const StatesPage = () => {
   const [states, setStates] = useState<State[]>([]);
@@ -140,14 +143,14 @@ export const StatesPage = () => {
     };
   }, [client]);
 
-  const listenToStates = async (client: ApiClient, signal: AbortSignal) => {
+  const listenToStates = async (client: DriverClient, signal: AbortSignal) => {
     let sinceRev = BigInt(0);
     let intervalId: NodeJS.Timeout;
 
     const pollStates = async () => {
       if (signal.aborted) return;
 
-      const getStatesCommand = new GetStates({
+      const getStatesCommand = new GetStatesCommand({
         limit: BigInt(100),
         latestOnly: false,
         sinceRev: sinceRev,
@@ -157,27 +160,20 @@ export const StatesPage = () => {
         getStates: getStatesCommand
       });
 
-      const request = new DoCommandRequest({
-        commands: [anyCommand],
-      });
-
       try {
-        const response = await client.doCommand(request, { signal });
-        if (response.results.length > 0) {
-          const result = response.results[0];
-          if (result.getStates) {
-            const getStatesResult = result.getStates;
-            
-            if (getStatesResult.states.length > 0) {
-              setStates(currentStates => {
-                const newStates = [...currentStates, ...getStatesResult.states];
-                return newStates.sort((a, b) => Number(b.rev - a.rev));
-              });
-              
-              const maxRev = getStatesResult.states.reduce((max, state) =>
-                state.rev > max ? state.rev : max, sinceRev);
-              sinceRev = maxRev;
-            }
+        const anyCommandResp = await client.getStates(anyCommand, { signal });
+        const getStatesCommand = anyCommandResp.getStates
+        if (getStatesCommand && getStatesCommand.result) {
+          const getStatesResult = getStatesCommand.result;
+          if (getStatesResult.states.length > 0) {
+            setStates(currentStates => {
+              const newStates = [...currentStates, ...getStatesResult.states];
+              return newStates.sort((a, b) => Number(b.rev - a.rev));
+            });
+
+            const maxRev = getStatesResult.states.reduce((max, state) =>
+              state.rev > max ? state.rev : max, sinceRev);
+            sinceRev = maxRev;
           }
         }
       } catch (error) {
@@ -197,7 +193,12 @@ export const StatesPage = () => {
   };
 
   function formatTransition({ from, to }: { from: string; to: string }) {
-    return from && from !== to ? `${from} -> ${to}` : to;
+    if (!from && !to) return "";
+    if (!from) return ` -> ${to}`;
+    if (!to) return `${from} -> `;
+    if (from === to) return from;
+
+    return `${from} -> ${to}`;
   }
 
   const data = states.map((state) => {

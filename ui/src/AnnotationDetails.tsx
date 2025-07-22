@@ -1,32 +1,36 @@
 import { useContext, useEffect, useState } from "react";
 import { ApiContext } from "./ApiContext";
-import { DoCommandResponse } from "./gen/flowstate/v1/server_pb";
+import {Command, GetDataCommand, Data, DataRef, State, StateCtx, StateCtxRef} from "./gen/flowstate/v1/messages_pb";
 
-export const AnnotationDetails = ({ id, rev }: { id: string; rev: string }) => {
-  const [info, setInfo] = useState<DoCommandResponse | null>(null);
+export const AnnotationDetails = ({ alias, state }: { alias: string; state: State }) => {
+  const [info, setInfo] = useState<Command | null>(null);
   const client = useContext(ApiContext);
 
   useEffect(() => {
     if (!client) return;
-    client
-      .doCommand({
-        data: [{ id, rev: BigInt(rev) }],
-        commands: [
-          {
-            getData: {
-              dataRef: { id, rev: BigInt(rev) }
-            },
-          },
-        ],
+
+    const command = new Command({
+      stateCtxs: [
+        new StateCtx({current: state, committed: state})
+      ],
+      datas: [
+        new Data()
+      ],
+      getData: new GetDataCommand({
+        alias: alias,
+        stateRef: new StateCtxRef({ idx: BigInt(0) }),
+        dataRef: new DataRef({ idx: BigInt(0) })
       })
-      .then(setInfo);
+    });
+    
+    client.getData(command).then(setInfo);
   }, [client]);
 
   if (!info) return "Loading...";
 
   return (
     <>
-      {info.data.map((d) => {
+      {info.datas.map((d) => {
         if (d.binary) return <span>{d.b}</span>;
 
         try {
