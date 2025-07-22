@@ -5,13 +5,11 @@ go 1.24.0
 toolchain go1.24.3
 
 require (
-	connectrpc.com/connect v1.18.1
 	github.com/dgraph-io/badger/v4 v4.7.0
 	github.com/jackc/pgx/v5 v5.6.0
-	github.com/makasim/flowstate v0.0.0-20250719180810-a327a765edf9
+	github.com/makasim/flowstate v0.0.0-20250722164645-8fef3a2458df
 	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.41.0
-	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -36,6 +34,7 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 )
 
-replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate
+// replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate

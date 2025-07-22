@@ -48,11 +48,15 @@ const columns: ColumnDef<StateData>[] = [
     accessorKey: "data",
     header: "Data",
     cell: ({ row }) =>
-      Object.values(row.original.annotations || {})
-        .filter((x) => x.startsWith("data:"))
-        .map((x) => x.slice(5).split(":"))
-        .map(([id, rev]) => (
-          <Dialog modal key={`${id}:${rev}`}>
+      Object.entries(row.original.annotations || {})
+        .filter(([key]) => key.startsWith("flowstate.data."))
+        .map(([key, value]) => {
+          const alias = key.slice(15); // Remove "flowstate.data." prefix
+          const [dataId, dataRev] = value.split(":");
+          return [alias, dataId, dataRev];
+        })
+        .map(([alias, dataId, dataRev]) => (
+          <Dialog modal key={`${dataId}:${dataRev}`}>
             <DialogTrigger className="text-slate">
               <svg
                 className="w-6 h-6 text-white"
@@ -78,10 +82,10 @@ const columns: ColumnDef<StateData>[] = [
 
             <DialogContent>
               <DialogTitle className="pb-4 sticky top-0 bg-background">
-                {id}:{rev}
+                flowstate.data.{alias}: "{dataId}:{dataRev}"
               </DialogTitle>
               <DialogDescription>
-                <AnnotationDetails id={id} rev={rev} />
+                <AnnotationDetails alias={alias} state={row.original.state} />
               </DialogDescription>
             </DialogContent>
           </Dialog>
@@ -189,7 +193,12 @@ export const StatesPage = () => {
   };
 
   function formatTransition({ from, to }: { from: string; to: string }) {
-    return from && from !== to ? `${from} -> ${to}` : to;
+    if (!from && !to) return "";
+    if (!from) return ` -> ${to}`;
+    if (!to) return `${from} -> `;
+    if (from === to) return from;
+
+    return `${from} -> ${to}`;
   }
 
   const data = states.map((state) => {

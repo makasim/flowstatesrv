@@ -5,6 +5,7 @@ tasks:
     cmds:
       - buf lint
       - rm -rf protogen/*
+      - rm -rf ui/src/gen/*
       - buf generate
 
   build:

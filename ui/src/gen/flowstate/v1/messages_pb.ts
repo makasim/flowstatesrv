@@ -123,45 +123,39 @@ export class StateCtx extends Message<StateCtx> {
 }
 
 /**
- * @generated from message flowstate.v1.StateRef
+ * @generated from message flowstate.v1.StateCtxRef
  */
-export class StateRef extends Message<StateRef> {
+export class StateCtxRef extends Message<StateCtxRef> {
   /**
-   * @generated from field: string id = 1;
+   * @generated from field: int64 idx = 1;
    */
-  id = "";
+  idx = protoInt64.zero;
 
-  /**
-   * @generated from field: int64 rev = 2;
-   */
-  rev = protoInt64.zero;
-
-  constructor(data?: PartialMessage<StateRef>) {
+  constructor(data?: PartialMessage<StateCtxRef>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "flowstate.v1.StateRef";
+  static readonly typeName = "flowstate.v1.StateCtxRef";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: "idx", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StateRef {
-    return new StateRef().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StateCtxRef {
+    return new StateCtxRef().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StateRef {
-    return new StateRef().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StateCtxRef {
+    return new StateCtxRef().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StateRef {
-    return new StateRef().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StateCtxRef {
+    return new StateCtxRef().fromJsonString(jsonString, options);
   }
 
-  static equals(a: StateRef | PlainMessage<StateRef> | undefined, b: StateRef | PlainMessage<StateRef> | undefined): boolean {
-    return proto3.util.equals(StateRef, a, b);
+  static equals(a: StateCtxRef | PlainMessage<StateCtxRef> | undefined, b: StateCtxRef | PlainMessage<StateCtxRef> | undefined): boolean {
+    return proto3.util.equals(StateCtxRef, a, b);
   }
 }
 
@@ -323,14 +317,9 @@ export class Data extends Message<Data> {
  */
 export class DataRef extends Message<DataRef> {
   /**
-   * @generated from field: string id = 1;
+   * @generated from field: int64 idx = 1;
    */
-  id = "";
-
-  /**
-   * @generated from field: int64 rev = 2;
-   */
-  rev = protoInt64.zero;
+  idx = protoInt64.zero;
 
   constructor(data?: PartialMessage<DataRef>) {
     super();
@@ -340,8 +329,7 @@ export class DataRef extends Message<DataRef> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.DataRef";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
+    { no: 1, name: "idx", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DataRef {
@@ -511,14 +499,14 @@ export class Command extends Message<Command> {
  */
 export class TransitCommand extends Message<TransitCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   /**
-   * @generated from field: string flow_id = 2;
+   * @generated from field: string to = 2;
    */
-  flowId = "";
+  to = "";
 
   constructor(data?: PartialMessage<TransitCommand>) {
     super();
@@ -528,8 +516,8 @@ export class TransitCommand extends Message<TransitCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.TransitCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
-    { no: 2, name: "flow_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
+    { no: 2, name: "to", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TransitCommand {
@@ -554,14 +542,14 @@ export class TransitCommand extends Message<TransitCommand> {
  */
 export class PauseCommand extends Message<PauseCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   /**
-   * @generated from field: string flow_id = 2;
+   * @generated from field: string to = 2;
    */
-  flowId = "";
+  to = "";
 
   constructor(data?: PartialMessage<PauseCommand>) {
     super();
@@ -571,8 +559,8 @@ export class PauseCommand extends Message<PauseCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.PauseCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
-    { no: 2, name: "flow_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
+    { no: 2, name: "to", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PauseCommand {
@@ -597,9 +585,9 @@ export class PauseCommand extends Message<PauseCommand> {
  */
 export class ResumeCommand extends Message<ResumeCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   constructor(data?: PartialMessage<ResumeCommand>) {
     super();
@@ -609,7 +597,7 @@ export class ResumeCommand extends Message<ResumeCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.ResumeCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResumeCommand {
@@ -634,9 +622,9 @@ export class ResumeCommand extends Message<ResumeCommand> {
  */
 export class EndCommand extends Message<EndCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   constructor(data?: PartialMessage<EndCommand>) {
     super();
@@ -646,7 +634,7 @@ export class EndCommand extends Message<EndCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.EndCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EndCommand {
@@ -671,9 +659,9 @@ export class EndCommand extends Message<EndCommand> {
  */
 export class ExecuteCommand extends Message<ExecuteCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   constructor(data?: PartialMessage<ExecuteCommand>) {
     super();
@@ -683,7 +671,7 @@ export class ExecuteCommand extends Message<ExecuteCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.ExecuteCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExecuteCommand {
@@ -708,9 +696,9 @@ export class ExecuteCommand extends Message<ExecuteCommand> {
  */
 export class DelayCommand extends Message<DelayCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   /**
    * @generated from field: flowstate.v1.State delaying_state = 2;
@@ -735,7 +723,7 @@ export class DelayCommand extends Message<DelayCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.DelayCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
     { no: 2, name: "delaying_state", kind: "message", T: State },
     { no: 3, name: "execute_at_sec", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
     { no: 4, name: "commit", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -800,9 +788,9 @@ export class CommitCommand extends Message<CommitCommand> {
  */
 export class NoopCommand extends Message<NoopCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   constructor(data?: PartialMessage<NoopCommand>) {
     super();
@@ -812,7 +800,7 @@ export class NoopCommand extends Message<NoopCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.NoopCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): NoopCommand {
@@ -837,14 +825,14 @@ export class NoopCommand extends Message<NoopCommand> {
  */
 export class StackCommand extends Message<StackCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef carrier_state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef carrier_state_ref = 1;
    */
-  carrierStateRef?: StateRef;
+  carrierStateRef?: StateCtxRef;
 
   /**
-   * @generated from field: flowstate.v1.StateRef stack_state_ref = 2;
+   * @generated from field: flowstate.v1.StateCtxRef stack_state_ref = 2;
    */
-  stackStateRef?: StateRef;
+  stackStateRef?: StateCtxRef;
 
   /**
    * @generated from field: string annotation = 3;
@@ -859,8 +847,8 @@ export class StackCommand extends Message<StackCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.StackCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "carrier_state_ref", kind: "message", T: StateRef },
-    { no: 2, name: "stack_state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "carrier_state_ref", kind: "message", T: StateCtxRef },
+    { no: 2, name: "stack_state_ref", kind: "message", T: StateCtxRef },
     { no: 3, name: "annotation", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
@@ -886,14 +874,14 @@ export class StackCommand extends Message<StackCommand> {
  */
 export class UnstackCommand extends Message<UnstackCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef carrier_state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef carrier_state_ref = 1;
    */
-  carrierStateRef?: StateRef;
+  carrierStateRef?: StateCtxRef;
 
   /**
-   * @generated from field: flowstate.v1.StateRef unstack_state_ref = 2;
+   * @generated from field: flowstate.v1.StateCtxRef unstack_state_ref = 2;
    */
-  unstackStateRef?: StateRef;
+  unstackStateRef?: StateCtxRef;
 
   /**
    * @generated from field: string annotation = 3;
@@ -908,8 +896,8 @@ export class UnstackCommand extends Message<UnstackCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.UnstackCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "carrier_state_ref", kind: "message", T: StateRef },
-    { no: 2, name: "unstack_state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "carrier_state_ref", kind: "message", T: StateCtxRef },
+    { no: 2, name: "unstack_state_ref", kind: "message", T: StateCtxRef },
     { no: 3, name: "annotation", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
@@ -935,9 +923,9 @@ export class UnstackCommand extends Message<UnstackCommand> {
  */
 export class AttachDataCommand extends Message<AttachDataCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   /**
    * @generated from field: flowstate.v1.DataRef data_ref = 2;
@@ -962,7 +950,7 @@ export class AttachDataCommand extends Message<AttachDataCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.AttachDataCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
     { no: 2, name: "data_ref", kind: "message", T: DataRef },
     { no: 3, name: "alias", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "commit", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
@@ -990,9 +978,9 @@ export class AttachDataCommand extends Message<AttachDataCommand> {
  */
 export class GetDataCommand extends Message<GetDataCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   /**
    * @generated from field: flowstate.v1.DataRef data_ref = 2;
@@ -1012,7 +1000,7 @@ export class GetDataCommand extends Message<GetDataCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.GetDataCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
     { no: 2, name: "data_ref", kind: "message", T: DataRef },
     { no: 3, name: "alias", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
@@ -1049,9 +1037,9 @@ export class GetStateByIDCommand extends Message<GetStateByIDCommand> {
   rev = protoInt64.zero;
 
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 3;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 3;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   constructor(data?: PartialMessage<GetStateByIDCommand>) {
     super();
@@ -1063,7 +1051,7 @@ export class GetStateByIDCommand extends Message<GetStateByIDCommand> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "rev", kind: "scalar", T: 3 /* ScalarType.INT64 */ },
-    { no: 3, name: "state_ref", kind: "message", T: StateRef },
+    { no: 3, name: "state_ref", kind: "message", T: StateCtxRef },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStateByIDCommand {
@@ -1093,9 +1081,9 @@ export class GetStateByLabelsCommand extends Message<GetStateByLabelsCommand> {
   labels: { [key: string]: string } = {};
 
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 2;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 2;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   constructor(data?: PartialMessage<GetStateByLabelsCommand>) {
     super();
@@ -1106,7 +1094,7 @@ export class GetStateByLabelsCommand extends Message<GetStateByLabelsCommand> {
   static readonly typeName = "flowstate.v1.GetStateByLabelsCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "labels", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
-    { no: 2, name: "state_ref", kind: "message", T: StateRef },
+    { no: 2, name: "state_ref", kind: "message", T: StateCtxRef },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetStateByLabelsCommand {
@@ -1382,9 +1370,9 @@ export class GetDelayedStatesResult extends Message<GetDelayedStatesResult> {
  */
 export class CommitStateCtxCommand extends Message<CommitStateCtxCommand> {
   /**
-   * @generated from field: flowstate.v1.StateRef state_ref = 1;
+   * @generated from field: flowstate.v1.StateCtxRef state_ref = 1;
    */
-  stateRef?: StateRef;
+  stateRef?: StateCtxRef;
 
   constructor(data?: PartialMessage<CommitStateCtxCommand>) {
     super();
@@ -1394,7 +1382,7 @@ export class CommitStateCtxCommand extends Message<CommitStateCtxCommand> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "flowstate.v1.CommitStateCtxCommand";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "state_ref", kind: "message", T: StateRef },
+    { no: 1, name: "state_ref", kind: "message", T: StateCtxRef },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CommitStateCtxCommand {
