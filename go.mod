@@ -7,7 +7,7 @@ toolchain go1.24.3
 require (
 	github.com/dgraph-io/badger/v4 v4.7.0
 	github.com/jackc/pgx/v5 v5.6.0
-	github.com/makasim/flowstate v0.0.0-20250722164645-8fef3a2458df
+	github.com/makasim/flowstate d3a2e649f93bb621356caadf4fdd2352d219bc9d
 	github.com/rs/cors v1.11.1
 	golang.org/x/net v0.41.0
 )
@@ -37,4 +37,4 @@ require (
 	google.golang.org/protobuf v1.36.6 // indirect
 )
 
-// replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate
+//replace github.com/makasim/flowstate => /Users/makasim/projects/Makasim/flowstate
